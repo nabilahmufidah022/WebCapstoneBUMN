@@ -6,6 +6,9 @@
     <title>Dashboard</title>
 </head>
 <body>
+    @extends('layout.index')
+
+    @section('content')
     @if(Auth::user()->usertype == 'user')
         <h1>
             Hello user
@@ -15,5 +18,7 @@
             Hello Admin
         </h1> 
     @endif
+
+    @endsection
 </body>
 </html>

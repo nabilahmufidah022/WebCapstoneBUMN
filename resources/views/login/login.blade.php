@@ -88,7 +88,7 @@
                 </div>
 
                 <!-- Password -->
-                <div class="mb-3">x
+                <div class="mb-3">
                     <label class="form-label fw-semibold">Password</label>
                     <input type="password" name="password" class="form-control" placeholder="Password" required>
                 </div>
