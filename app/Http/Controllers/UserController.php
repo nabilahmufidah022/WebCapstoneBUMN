@@ -50,11 +50,6 @@ class UserController extends Controller
         return view('partnership.dashboard', compact('user'));
     }
 
-    public function goDaftarMitra(){
-        $user = Auth::user();
-        return view('partnership.daftar_mitra', compact('user'));
-    }
-
     public function profile(){
         $user = Auth::user();
         return view('partnership.profile', compact('user'));
@@ -112,5 +107,10 @@ class UserController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    public function account(){
+        $users = User::all();
+        return view('admin/account', compact('users'));
     }
 }

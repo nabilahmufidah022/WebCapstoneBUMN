@@ -88,7 +88,7 @@
 
                     <!-- Username -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Username</label>
+                        <label class="form-label fw-semibold">Email</label>
                         <input type="text" name="email" class="form-control" placeholder="Username" value="{{ old('email') }}" required>
                     </div>
 

@@ -106,24 +106,24 @@
               <span class="navlink_icon">
                 <i class="bx bxs-group"></i>
               </span>
-              <span class="navlink">Partership</span>
+              <span class="navlink">Partnership</span>
               <i class="bx bx-chevron-right arrow-left"></i>
             </div>
 
             <ul class="menu_items submenu">
-              <a href="{{ route('daftar_mitra') }}" class="nav_link sublink">Daftar Mitra</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
+              <a href="{{ route('list_mitra') }}" class="nav_link sublink">Daftar Mitra</a>
+              <a href="{{ route('mitra.participation.index') }}" class="nav_link sublink">Keikutsertaan Mitra</a> 
               <a href="#" class="nav_link sublink">Nav Sub Link</a>
               <a href="#" class="nav_link sublink">Nav Sub Link</a>
             </ul>
           </li>
 
           <li class="item">
-            <a href="{{ route('daftar_mitra') }}" class="nav_link">
+            <a href="{{ route('account') }}" class="nav_link">
               <span class="navlink_icon">
                 <i class="bx bxs-group"></i>
               </span>
-              <span class="navlink">Partnership</span>
+              <span class="navlink">Account</span>
             </a>
           </li>
           <!-- <li class="item">
@@ -197,10 +197,9 @@
             @yield('content')
         </main>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- JavaScript -->
-     <script src="{{ asset('js/script.js') }}"></script>
-    <!-- <script src="script.js"></script> -->
+
+    <script src="{{ asset('js/script.js') }}"></script>
+
   </body>
 </html>
