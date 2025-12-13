@@ -13,7 +13,17 @@ Route::get('/', [UserController::class, 'login'])->name('login');
 Route::get('/signup', [UserController::class, 'signup'])->name('register');
 Route::post('login', [UserController::class, 'logincheck'])->name('logincheck');
 Route::post('signup', [UserController::class, 'registercheck'])->name('registercheck');
-Route::get('account',[UserController::class,'account'])->name('account');
+Route::middleware('auth')->group(function () {
+    Route::get('account',[UserController::class,'account'])->name('account');
+    Route::get('account/create',[UserController::class,'createAccount'])->name('account.create');
+    Route::post('account',[UserController::class,'storeAccount'])->name('account.store');
+    Route::get('account/{id}/edit',[UserController::class,'editAccount'])->name('account.edit');
+    Route::put('account/{id}',[UserController::class,'updateAccount'])->name('account.update');
+    Route::delete('account/{id}',[UserController::class,'deleteAccount'])->name('account.delete');
+});
+Route::get('account/{id}/edit',[UserController::class,'editAccount'])->name('account.edit');
+Route::put('account/{id}',[UserController::class,'updateAccount'])->name('account.update');
+Route::delete('account/{id}',[UserController::class,'deleteAccount'])->name('account.delete');
 
 
 

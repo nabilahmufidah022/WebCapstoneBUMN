@@ -113,4 +113,66 @@ class UserController extends Controller
         $users = User::all();
         return view('admin/account', compact('users'));
     }
+
+    public function createAccount(){
+        return view('admin/create_account');
+    }
+
+    public function storeAccount(Request $request){
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
+            'usertype' => 'required|in:user,admin',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'usertype' => $request->usertype,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Account created successfully.']);
+        }
+
+        return redirect()->route('account')->with('success', 'Account created successfully.');
+    }
+
+    public function editAccount($id)
+    {
+        $user = User::findOrFail($id);
+        return response()->json($user);
+    }
+
+    public function updateAccount(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'usertype' => 'required|in:user,admin',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'usertype' => $request->usertype,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Account updated successfully.']);
+        }
+
+        return redirect()->route('account')->with('success', 'Account updated successfully.');
+    }
+
+    public function deleteAccount($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return response()->json(['success' => true, 'message' => 'Account deleted successfully.']);
+    }
 }
