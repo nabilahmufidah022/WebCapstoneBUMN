@@ -192,3 +192,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+// Add Participation Modal Functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const addParticipationBtn = document.getElementById('addParticipationBtn');
+  const addParticipationModal = new bootstrap.Modal(document.getElementById('addParticipationModal'));
+  const saveParticipationBtn = document.getElementById('saveParticipationBtn');
+  const addParticipationForm = document.getElementById('addParticipationForm');
+
+  if (addParticipationBtn) {
+    addParticipationBtn.addEventListener('click', function() {
+      addParticipationModal.show();
+    });
+  }
+
+  if (saveParticipationBtn && addParticipationForm) {
+    saveParticipationBtn.addEventListener('click', function() {
+      const formData = new FormData(addParticipationForm);
+
+      fetch('/mitra/participation', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          addParticipationModal.hide();
+          addParticipationForm.reset();
+          // Reload the page to show the new participation in the table
+          location.reload();
+        } else {
+          alert('Error: ' + (data.message || 'Failed to create participation'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the participation');
+      });
+    });
+  }
+});

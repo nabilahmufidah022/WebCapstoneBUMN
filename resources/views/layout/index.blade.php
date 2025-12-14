@@ -11,6 +11,8 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <title>Side Navigation Bar in HTML CSS JavaScript</title>
     <link href="{{ asset('css/style.css') }}" rel="stylesheet" type="text/css" >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
   </head>
   <body>
     <!-- navbar -->
@@ -114,11 +116,10 @@
             <ul class="menu_items submenu">
               <a href="{{ route('list_mitra') }}" class="nav_link sublink">Daftar Mitra</a>
               <a href="{{ route('mitra.participation.index') }}" class="nav_link sublink">Keikutsertaan Mitra</a> 
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
             </ul>
           </li>
-
+          @auth
+          @if(auth()->user()->usertype === 'admin')
           <li class="item">
             <a href="{{ route('account') }}" class="nav_link">
               <span class="navlink_icon">
@@ -127,6 +128,8 @@
               <span class="navlink">Account</span>
             </a>
           </li>
+          @endif
+          @endauth
           <!-- <li class="item">
             <a href="#" class="nav_link">
               <span class="navlink_icon">
