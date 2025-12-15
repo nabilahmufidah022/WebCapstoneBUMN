@@ -171,8 +171,13 @@ class UserController extends Controller
     public function deleteAccount($id)
     {
         $user = User::findOrFail($id);
-        $user->delete();
 
-        return response()->json(['success' => true, 'message' => 'Account deleted successfully.']);
+        // Toggle active state instead of deleting
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        $message = $user->is_active ? 'Account activated successfully.' : 'Account deactivated successfully.';
+
+        return response()->json(['success' => true, 'message' => $message, 'is_active' => $user->is_active]);
     }
 }

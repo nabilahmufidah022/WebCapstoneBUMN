@@ -165,8 +165,13 @@ document.addEventListener('DOMContentLoaded', function() {
   deleteButtons.forEach(button => {
     button.addEventListener('click', function() {
       const userId = this.getAttribute('data-id');
+      const isActive = this.getAttribute('data-active') === '1';
 
-      if (confirm('Are you sure you want to delete this account?')) {
+      const confirmMessage = isActive
+        ? 'Are you sure you want to deactivate this account?'
+        : 'Are you sure you want to activate this account?';
+
+      if (confirm(confirmMessage)) {
         fetch(`/account/${userId}`, {
           method: 'DELETE',
           headers: {
@@ -181,12 +186,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reload the page to show the updated table
             location.reload();
           } else {
-            alert('Error: ' + (data.message || 'Failed to delete account'));
+            alert('Error: ' + (data.message || 'Failed to update account'));
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          alert('An error occurred while deleting the account');
+          alert('An error occurred while updating the account');
         });
       }
     });

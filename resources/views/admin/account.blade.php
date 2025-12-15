@@ -27,7 +27,12 @@
             <td>{{ $user->email }}</td>
             <td>
               <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="{{ $user->id }}" data-name="{{ $user->name }}" data-email="{{ $user->email }}" data-usertype="{{ $user->usertype }}">Edit</button>
-              <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{ $user->id }}">Delete</button>
+              @php $active = isset($user->is_active) ? $user->is_active : true; @endphp
+              @if($active)
+                <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{ $user->id }}" data-active="1">Non Aktifkan</button>
+              @else
+                <button type="button" class="btn btn-sm btn-success delete-btn" data-id="{{ $user->id }}" data-active="0">Aktifkan</button>
+              @endif
             </td>
           </tr>
           @endforeach
