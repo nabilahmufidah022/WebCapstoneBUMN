@@ -76,6 +76,11 @@
                                class="text-primary text-decoration-none fw-semibold">
                                 <i class="bi bi-eye me-1"></i> Detail
                             </a>
+
+                            <a href="{{ route('mitra.participation.feedback', $item->id) }}"
+                               class="ms-3 text-success text-decoration-none fw-semibold">
+                                <i class="bi bi-chat-left-text me-1"></i> Feedback
+                            </a>
                         </td>
                     </tr>
                     @empty

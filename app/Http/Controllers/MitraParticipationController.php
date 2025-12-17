@@ -74,4 +74,20 @@ class MitraParticipationController extends Controller
 
         return view('partnership.participation_detail', compact('participation'));
     }
+
+    // feedback form/view for a participation
+    public function feedback($id)
+    {
+        $user = Auth::user();
+
+        $query = MitraEventParticipation::with('mitra');
+        if ($user->usertype !== 'admin') {
+            $mitra_id = Mitra::where('user_id', $user->id)->value('id');
+            $query->where('mitra_id', $mitra_id);
+        }
+
+        $participation = $query->findOrFail($id);
+
+        return view('partnership.participation_feedback', compact('participation'));
+    }
 }
