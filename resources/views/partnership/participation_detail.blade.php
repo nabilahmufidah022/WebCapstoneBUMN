@@ -64,6 +64,10 @@
                    class="btn btn-outline-secondary rounded-pill px-4">
                     <i class="bi bi-arrow-left me-1"></i> Kembali
                 </a>
+                <a href="{{ route('mitra.participation.feedback', $participation->id) }}"
+                   class="btn btn-success rounded-pill px-4 ms-2">
+                    <i class="bi bi-chat-left-text me-1"></i> Feedback
+                </a>
             </div>
 
         </div>
