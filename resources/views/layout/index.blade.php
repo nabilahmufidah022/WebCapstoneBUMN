@@ -1,39 +1,31 @@
 <!DOCTYPE html>
-<!-- Coding by CodingNepal || www.codingnepalweb.com -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Boxicons CSS -->
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-    <title>Side Navigation Bar in HTML CSS JavaScript</title>
-    <link href="{{ asset('css/style.css') }}" rel="stylesheet" type="text/css" >
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Rumah BUMN - Dashboard</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="{{ asset('css/style.css') }}" rel="stylesheet" type="text/css" >
   </head>
   <body>
-    <!-- navbar -->
     <nav class="navbar">
       <div class="logo_item">
         <i class="bx bx-menu" id="sidebarOpen"></i>
-        <img src="img/rumah-bumn.png" alt=""></i>Rumah BUMN
+        <img src="{{ asset('img/rumah-bumn.png') }}" alt=""> Rumah BUMN
       </div>
-
-      <!-- <div class="search_bar">
-        <input type="text" placeholder="Search" />
-      </div> -->
 
       <div class="navbar_content">
         <i class="bi bi-grid"></i>
         <i class='bx bx-sun' id="darkLight"></i>
-        <i class='bx bx-bell' ></i>
+        <i class='bx bx-bell'></i>
         @auth
         <div class="dropdown">
           <img src="{{ Auth::user()->profile_image ? asset('img/' . Auth::user()->profile_image) : asset('img/profile.jpg') }}" alt="Profile" class="profile dropdown-toggle" id="profileToggle" data-bs-toggle="dropdown" aria-expanded="false" />
-          <ul class="dropdown-menu dropdown-menu-end" id="profileDropdown">
+          <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="{{ route('profile') }}">Profile</a></li>
             <li><a class="dropdown-item" href="{{ route('settings') }}">Settings</a></li>
             <li><hr class="dropdown-divider"></li>
@@ -49,63 +41,20 @@
       </div>
     </nav>
 
-    <!-- sidebar -->
-    <nav class="sidebar">
+    <<nav class="sidebar">
       <div class="menu_content">
-        <!-- <ul class="menu_items">
-          <div class="menu_title menu_dahsboard"></div>
-
-          <li class="item">
-            <div href="#" class="nav_link submenu_item">
-              <span class="navlink_icon">
-                <i class="bx bx-home-alt"></i>
-              </span>
-              <span class="navlink">Home</span>
-              <i class="bx bx-chevron-right arrow-left"></i>
-            </div>
-
-            <ul class="menu_items submenu">
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-            </ul>
-          </li>
-
-          <li class="item">
-            <div href="#" class="nav_link submenu_item">
-              <span class="navlink_icon">
-                <i class="bx bx-grid-alt"></i>
-              </span>
-              <span class="navlink">Overview</span>
-              <i class="bx bx-chevron-right arrow-left"></i>
-            </div>
-
-            <ul class="menu_items submenu">
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-              <a href="#" class="nav_link sublink">Nav Sub Link</a>
-            </ul>
-          </li>
-        </ul> -->
-
         <ul class="menu_items">
-          <!-- <div class="menu_title menu_editor"></div> -->
-          <!-- duplicate these li tag if you want to add or remove navlink only -->
-          <!-- Start -->
           <li class="item">
-            <a href="#" class="nav_link">
+            <a href="{{ route('dashboard') }}" class="nav_link">
               <span class="navlink_icon">
                 <i class="bx bx-home-alt"></i>
               </span>
               <span class="navlink">Dashboard Laporan</span>
             </a>
           </li>
-          <!-- End -->
 
           <li class="item">
-            <div href="#" class="nav_link submenu_item">
+            <div class="nav_link submenu_item">
               <span class="navlink_icon">
                 <i class="bx bxs-group"></i>
               </span>
@@ -114,76 +63,28 @@
             </div>
 
             <ul class="menu_items submenu">
-              <a href="{{ route('list_mitra') }}" class="nav_link sublink">Daftar Mitra</a>
-              <a href="{{ route('mitra.participation.index') }}" class="nav_link sublink">Keikutsertaan Mitra</a> 
+              <li><a href="{{ route('list_mitra') }}" class="nav_link sublink">Daftar Mitra</a></li>
+              
+              @if(Auth::user()->usertype === 'admin')
+              <li><a href="{{ route('kelola_pendaftaran') }}" class="nav_link sublink">Kelola Pendaftaran</a></li>
+              @endif
+
+              <li><a href="{{ route('mitra.participation.index') }}" class="nav_link sublink">Keikutsertaan Mitra</a></li>
             </ul>
           </li>
-          @auth
-          @if(auth()->user()->usertype === 'admin')
+
+          @if(Auth::user()->usertype === 'admin')
           <li class="item">
             <a href="{{ route('account') }}" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bxs-group"></i>
+                <i class="bx bxs-user-detail"></i>
               </span>
-              <span class="navlink">Account</span>
+              <span class="navlink">Account Management</span>
             </a>
           </li>
           @endif
-          @endauth
-          <!-- <li class="item">
-            <a href="#" class="nav_link">
-              <span class="navlink_icon">
-                <i class="bx bx-filter"></i>
-              </span>
-              <span class="navlink">Filter</span>
-            </a>
-          </li>
-          <li class="item">
-            <a href="#" class="nav_link">
-              <span class="navlink_icon">
-                <i class="bx bx-cloud-upload"></i>
-              </span>
-              <span class="navlink">Upload new</span>
-            </a>
-          </li> -->
         </ul>
-        <!-- <ul class="menu_items">
-          <div class="menu_title menu_setting"></div>
-          <li class="item">
-            <a href="#" class="nav_link">
-              <span class="navlink_icon">
-                <i class="bx bx-flag"></i>
-              </span>
-              <span class="navlink">Notice board</span>
-            </a>
-          </li>
-          <li class="item">
-            <a href="#" class="nav_link">
-              <span class="navlink_icon">
-                <i class="bx bx-medal"></i>
-              </span>
-              <span class="navlink">Award</span>
-            </a>
-          </li>
-          <li class="item">
-            <a href="#" class="nav_link">
-              <span class="navlink_icon">
-                <i class="bx bx-cog"></i>
-              </span>
-              <span class="navlink">Setting</span>
-            </a>
-          </li>
-          <li class="item">
-            <a href="#" class="nav_link">
-              <span class="navlink_icon">
-                <i class="bx bx-layer"></i>
-              </span>
-              <span class="navlink">Features</span>
-            </a>
-          </li>
-        </ul> -->
 
-        <!-- Sidebar Open / Close -->
         <div class="bottom_content">
           <div class="bottom expand_sidebar">
             <span> Expand</span>
@@ -197,13 +98,11 @@
       </div>
     </nav>
     
-        <main>
-            @yield('content')
-        </main>
+    <main class="main">
+        @yield('content')
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="{{ asset('js/script.js') }}"></script>
-
   </body>
 </html>

@@ -9,18 +9,73 @@ use Illuminate\Support\Facades\Auth;
 
 class MitraController extends Controller
 {
-    public function goListMitra(){
+    /**
+     * Halaman Daftar Mitra
+     * Admin: Melihat semua mitra yang disetujui (Status 1) dengan filter
+     * User: Hanya melihat status pendaftaran miliknya sendiri
+     */
+    public function goListMitra(Request $request)
+    {
         $user = Auth::user();
+        
         if ($user->usertype == 'admin') {
-            $mitras = Mitra::with('user')->get();
+            // LOGIKA ADMIN: Ambil semua mitra yang sudah disetujui (status 1)
+            $query = Mitra::with('user')->where('status', 1);
+
+            // Filter Search (Nama Perusahaan atau Email)
+            if ($request->filled('search')) {
+                $query->where(function($q) use ($request) {
+                    $q->where('nama_perusahaan', 'like', '%' . $request->search . '%')
+                      ->orWhereHas('user', function($u) use ($request) {
+                          $u->where('email', 'like', '%' . $request->search . '%');
+                      });
+                });
+            }
+
+            // Filter Kategori Mitra
+            if ($request->filled('kategori')) {
+                $query->where('kategori_mitra', $request->kategori);
+            }
+
+            // Filter Tahun
+            if ($request->filled('tahun')) {
+                $query->whereYear('created_at', $request->tahun);
+            }
+
+            $mitras = $query->orderBy('created_at', 'desc')->get();
         } else {
-            $mitras = Mitra::with('user')->where('user_id', Auth::id())->get();
+            // LOGIKA USER: Hanya ambil data milik user yang sedang login
+            $mitras = Mitra::with('user')
+                ->where('user_id', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
+
         $hasMitra = $user->mitra()->exists();
-        return view('partnership.list_mitra', compact('user','mitras', 'hasMitra'));
+
+        return view('partnership.list_mitra', compact('user', 'mitras', 'hasMitra'));
     }
 
-    public function goDaftarMitra(){
+    /**
+     * Halaman Kelola Pendaftaran (Khusus Admin)
+     * Menampilkan pendaftaran yang masih berstatus 0 (Pending)
+     */
+    public function goKelolaPendaftaran()
+    {
+        $user = Auth::user();
+
+        if ($user->usertype != 'admin') {
+            return redirect()->route('dashboard');
+        }
+
+        // Ambil mitra yang statusnya 0 (Pending) untuk diverifikasi
+        $mitras = Mitra::with('user')->where('status', 0)->orderBy('created_at', 'asc')->get();
+        
+        return view('partnership.kelola_pendaftaran', compact('user', 'mitras'));
+    }
+
+    public function goDaftarMitra()
+    {
         $user = Auth::user();
         $hasMitra = $user->mitra()->exists();
         return view('partnership.daftar_mitra', compact('user', 'hasMitra'));
@@ -34,7 +89,7 @@ class MitraController extends Controller
             'nama_perusahaan' => 'required|string|max:255',
             'lokasi_perusahaan' => 'required|string|max:255',
             'deskripsi_perusahaan' => 'required|string',
-            'company_profile' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // 5MB max
+            'company_profile' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
             'surat_permohonan_audiensi' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
@@ -45,7 +100,7 @@ class MitraController extends Controller
             'nama_perusahaan' => $request->nama_perusahaan,
             'lokasi_perusahaan' => $request->lokasi_perusahaan,
             'deskripsi_perusahaan' => $request->deskripsi_perusahaan,
-            'status' => 0,
+            'status' => 0, 
         ];
 
         if ($request->hasFile('company_profile')) {
@@ -62,7 +117,6 @@ class MitraController extends Controller
 
         $mitra = Mitra::create($data);
 
-        // Log history
         HistoryMitra::create([
             'mitra_id' => $mitra->id,
             'action' => 'registered',
@@ -70,7 +124,7 @@ class MitraController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('list_mitra')->with('success', 'Mitra berhasil didaftarkan.');
+        return redirect()->route('list_mitra')->with('success', 'Pendaftaran berhasil dikirim. Menunggu verifikasi admin.');
     }
 
     public function approve($id)
@@ -78,7 +132,6 @@ class MitraController extends Controller
         $mitra = Mitra::findOrFail($id);
         $mitra->update(['status' => 1]);
 
-        // Log history
         HistoryMitra::create([
             'mitra_id' => $mitra->id,
             'action' => 'approved',
@@ -86,7 +139,7 @@ class MitraController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('list_mitra')->with('success', 'Mitra berhasil disetujui.');
+        return redirect()->route('kelola_pendaftaran')->with('success', 'Mitra berhasil disetujui.');
     }
 
     public function reject($id)
@@ -94,7 +147,6 @@ class MitraController extends Controller
         $mitra = Mitra::findOrFail($id);
         $mitra->update(['status' => 2]);
 
-        // Log history
         HistoryMitra::create([
             'mitra_id' => $mitra->id,
             'action' => 'rejected',
@@ -102,7 +154,7 @@ class MitraController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('list_mitra')->with('success', 'Mitra berhasil ditolak.');
+        return redirect()->route('kelola_pendaftaran')->with('success', 'Mitra berhasil ditolak.');
     }
 
     public function detail($id)

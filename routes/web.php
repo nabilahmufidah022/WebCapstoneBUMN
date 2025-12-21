@@ -33,10 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::get('daftar_mitra',[MitraController::class,'goDaftarMitra'])->name('daftar_mitra');
     Route::post('daftar_mitra', [MitraController::class, 'store'])->name('store_mitra');
     Route::get('list_mitra', [MitraController::class, 'goListMitra'])->name('list_mitra');
+    Route::get('kelola_pendaftaran', [MitraController::class, 'goKelolaPendaftaran'])->name('kelola_pendaftaran');
     Route::post('mitra/approve/{id}', [MitraController::class, 'approve'])->name('mitra.approve');
     Route::post('mitra/reject/{id}', [MitraController::class, 'reject'])->name('mitra.reject');
     Route::get('mitra/detail/{id}', [MitraController::class, 'detail'])->name('mitra.detail');
-    
+
     // Mitra participation feature routes
     Route::get('mitra/participation', [MitraParticipationController::class, 'index'])->name('mitra.participation.index');
     Route::get('mitra/participation/create', [MitraParticipationController::class, 'create'])->name('mitra.participation.create');
