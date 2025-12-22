@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin Rumah BUMN',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('admin123'),
-            'usertype' => 'admin', // Sesuai kolom yang kamu punya
+            'usertype' => 'admin', 
         ]);
     }
 }
