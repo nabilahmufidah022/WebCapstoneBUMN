@@ -59,16 +59,23 @@
             </div>
 
             <!-- FOOTER -->
-            <div class="mt-4 pt-3 border-top">
+            <div class="mt-4 pt-3 border-top" style="position: relative; z-index: 10;">
                 <a href="{{ route('mitra.participation.index') }}"
                    class="btn btn-outline-secondary rounded-pill px-4">
                     <i class="bi bi-arrow-left me-1"></i> Kembali
                 </a>
-                <a href="{{ route('mitra.participation.feedback', $participation->id) }}"
+                {{-- User Feedback Button (Goes to Admin Section as requested) --}}
+                <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'admin']) }}"
                    class="btn btn-success rounded-pill px-4 ms-2">
-                    <i class="bi bi-chat-left-text me-1"></i> Feedback
+                    <i class="bi bi-chat-left-text me-1"></i>Feedback
+                </a>
+                {{-- Admin Feedback Button (Goes to User Section as requested) --}}
+                <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'user']) }}" class="btn btn-outline-primary rounded-pill px-4 ms-2">
+                    <i class="bi bi-eye me-1"></i> Lihat Feedback
                 </a>
             </div>
+
+            {{-- Feedback section removed from detail page per request --}}
 
         </div>
     </div>

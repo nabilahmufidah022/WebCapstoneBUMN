@@ -33,15 +33,17 @@ class UserController extends Controller
 
         $validation = $request->validate([
             'name'=>'required',
-            'email'=>'required|email',
-            'password'=>'required',
+            'email'=>'required|email|unique:users,email',
+            'password'=>'required|min:8',
         ]);
 
-        $user = User::Create($validation);
+        $validation['password'] = Hash::make($validation['password']);
+
+        $user = User::create($validation);
 
         Auth::login($user);
 
-        return redirect()->route('login');
+        return redirect()->route('dashboard');
 
     }
 
