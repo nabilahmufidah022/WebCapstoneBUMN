@@ -10,11 +10,13 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin Rumah BUMN',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin123'),
-            'usertype' => 'admin', // Sesuai kolom yang kamu punya
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin Rumah BUMN',
+                'password' => Hash::make('admin123'),
+                'usertype' => 'admin', // Sesuai kolom yang kamu punya
+            ]
+        );
     }
 }

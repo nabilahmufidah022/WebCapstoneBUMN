@@ -25,4 +25,9 @@ class MitraEventParticipation extends Model
     {
         return $this->belongsTo(Mitra::class);
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class, 'mitra_event_participation_id');
+    }
 }
