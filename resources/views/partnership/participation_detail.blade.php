@@ -69,8 +69,8 @@
                    class="btn btn-success rounded-pill px-4 ms-2">
                     <i class="bi bi-chat-left-text me-1"></i>Feedback
                 </a>
-                {{-- Admin Feedback Button (Goes to User Section as requested) --}}
-                <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'user']) }}" class="btn btn-outline-primary rounded-pill px-4 ms-2">
+                {{-- Admin Feedback Button (Goes to User Section as requested, but we use 'all' to show everything) --}}
+                <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'all']) }}" class="btn btn-outline-primary rounded-pill px-4 ms-2">
                     <i class="bi bi-eye me-1"></i> Lihat Feedback
                 </a>
             </div>

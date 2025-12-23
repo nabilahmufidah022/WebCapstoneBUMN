@@ -18,9 +18,21 @@
             @php
                 $userHasSubmitted = $participation->feedbacks->contains('user_id', auth()->id());
                 $isAdmin = auth()->user()->usertype === 'admin';
-                $showForm = !$isAdmin && !$userHasSubmitted;
-
                 $section = request('section', 'all');
+                
+                // Mode logic
+                $isViewMode = ($section === 'all'); // Blue Button
+                $isInputMode = ($section !== 'all'); // Green Button
+                
+                // Show form if in Input Mode AND not submitted yet (for User)
+                $showForm = $isInputMode && !$userHasSubmitted; 
+                
+                // Logic for Admin Form: Show if Admin AND Input Mode
+                $showAdminForm = $isAdmin && $isInputMode;
+
+                $displayFeedbacks = $participation->feedbacks;
+
+                // Restore variables for display logic
                 $showUserContent = ($section === 'user' || $section === 'all' || $section === 'admin');
                 $showAdminContent = ($section === 'admin' || $section === 'all');
             @endphp
@@ -29,8 +41,30 @@
                 <div class="alert alert-success mb-3">{{ session('success') }}</div>
             @endif
 
-            {{-- Feedback submission form (shown when user can submit and hasn't yet, and section is user/all) --}}
-            @if(auth()->check() && $showForm && $showUserContent)
+            {{-- ADMIN FEEDBACK FORM (Visible only in Input Mode for Admin) --}}
+            @if($showAdminForm)
+            <div class="card border-primary shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Kirim Feedback / Pesan untuk Mitra</h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('mitra.participation.feedback.reply', $participation->id) }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <textarea name="message" class="form-control" rows="4" placeholder="Tulis evaluasi, pesan, atau feedback untuk mitra di sini..." required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-send me-2"></i>Kirim Feedback
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @endif
+
+            {{-- USER FEEDBACK FORM (Visible only in Input Mode for Mitra) --}}
+            @if(auth()->check() && $showForm && !$isAdmin)
             <form method="POST" action="{{ route('mitra.participation.feedback.store', $participation->id) }}">
                 @csrf
                 <div class="mb-3">
@@ -75,28 +109,19 @@
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-success">Simpan Feedback</button>
-                    <a href="{{ route('mitra.participation.index') }}" class="btn btn-secondary">Kembali</a>
+                    {{-- Go back to detail page --}}
+                    <a href="{{ route('mitra.participation.show', $participation->id) }}" class="btn btn-secondary">Kembali</a>
                 </div>
             </form>
-
             @endif
             
-
-            
+            {{-- FEEDBACK LIST (Only in View Mode) --}}
+            @if($isViewMode)
             @php
-                $displayFeedbacks = $participation->feedbacks;
-                if (auth()->check()) {
-                    // If regular user, only show their own
-                    if (auth()->user()->usertype !== 'admin') {
-                        $displayFeedbacks = $displayFeedbacks->where('user_id', auth()->id());
-                    } 
-                    // If Admin (or anyone) and section is 'user', maybe we only want to see "User Feedbacks" (from Mitra)
-                    // If there are feedbacks created by admins (testing?), hide them?
-                    // Let's assume we filter out admin-authored feedbacks generally if the goal is "Feedback dari User"
-                    $displayFeedbacks = $displayFeedbacks->filter(function($f) { 
-                         return $f->user && $f->user->usertype !== 'admin'; 
-                    });
-                }
+                // No filtering by user_id here. 
+                // We want Mitra to see Admin's feedback, and Admin to see Mitra's feedback.
+                // Since the participation is already scoped to the Mitra (in Controller), 
+                // all feedbacks attached to this participation are relevant.
             @endphp
             
             @if(auth()->check())
@@ -111,7 +136,13 @@
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <strong>{{ $feedback->user ? $feedback->user->name : 'Anonim' }}</strong>
+                                        @if($feedback->user && $feedback->user->usertype === 'admin')
+                                            <span class="badge bg-primary mb-1">Feedback dari Admin (ke Mitra)</span><br>
+                                            <strong>{{ $feedback->user->name }}</strong>
+                                        @else
+                                            <span class="badge bg-success mb-1">Feedback dari Mitra (ke Admin)</span><br>
+                                            <strong>{{ $feedback->user ? $feedback->user->name : 'Anonim' }}</strong>
+                                        @endif
                                         <small class="text-muted"> — {{ $feedback->created_at->diffForHumans() }}</small>
                                     </div>
                                 </div>
@@ -168,6 +199,7 @@
                     </div>
                 @endif
             </div>
+            @endif
             @endif
         </div>
     </div>
