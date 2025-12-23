@@ -163,4 +163,67 @@ class MitraController extends Controller
         $histories = HistoryMitra::with('user')->where('mitra_id', $id)->orderBy('created_at', 'desc')->get();
         return view('partnership.detail_mitra', compact('mitra', 'histories'));
     }
+
+    /**
+     * Export mitra list as CSV (admin only). Honors same filters as goListMitra.
+     */
+    public function exportListMitra(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->usertype != 'admin') {
+            abort(403);
+        }
+
+        $query = Mitra::with('user')->where('status', 1);
+
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('nama_perusahaan', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('user', function($u) use ($request) {
+                      $u->where('email', 'like', '%' . $request->search . '%');
+                  });
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('kategori_mitra', $request->kategori);
+        }
+
+        if ($request->filled('tahun')) {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
+        $mitras = $query->orderBy('created_at', 'desc')->get();
+
+        $filename = 'mitra_export_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $columns = ['Nama Perusahaan', 'Nama PIC', 'Email PIC', 'No. HP PIC', 'Lokasi', 'Deskripsi Perusahaan', 'Didaftarkan Pada'];
+
+        $callback = function() use ($mitras, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($mitras as $m) {
+                $row = [
+                    $m->nama_perusahaan,
+                    $m->nama_lengkap ?? '',
+                    $m->user->email ?? '',
+                    $m->no_telepon ?? '',
+                    $m->lokasi_perusahaan,
+                    $m->deskripsi_perusahaan ?? '',
+                    $m->created_at->toDateTimeString(),
+                ];
+                fputcsv($file, $row);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

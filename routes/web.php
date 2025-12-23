@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('daftar_mitra',[MitraController::class,'goDaftarMitra'])->name('daftar_mitra');
     Route::post('daftar_mitra', [MitraController::class, 'store'])->name('store_mitra');
     Route::get('list_mitra', [MitraController::class, 'goListMitra'])->name('list_mitra');
+    Route::get('list_mitra/export', [MitraController::class, 'exportListMitra'])->name('list_mitra.export');
     Route::get('kelola_pendaftaran', [MitraController::class, 'goKelolaPendaftaran'])->name('kelola_pendaftaran');
     Route::post('mitra/approve/{id}', [MitraController::class, 'approve'])->name('mitra.approve');
     Route::post('mitra/reject/{id}', [MitraController::class, 'reject'])->name('mitra.reject');
@@ -40,6 +41,7 @@ Route::middleware('auth')->group(function () {
 
     // Mitra participation feature routes
     Route::get('mitra/participation', [MitraParticipationController::class, 'index'])->name('mitra.participation.index');
+    Route::get('mitra/participation/export', [MitraParticipationController::class, 'export'])->name('mitra.participation.export');
     Route::get('mitra/participation/create', [MitraParticipationController::class, 'create'])->name('mitra.participation.create');
     Route::post('mitra/participation', [MitraParticipationController::class, 'store'])->name('mitra.participation.store');
     Route::get('/mitra/participation/{id}', [MitraParticipationController::class, 'show'])->name('mitra.participation.show');

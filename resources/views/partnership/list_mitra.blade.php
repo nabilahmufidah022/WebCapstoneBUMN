@@ -15,31 +15,25 @@
     @if($user->usertype == 'admin')
         <div class="d-flex justify-content-between align-items-center mb-4"> 
             <h4 class="fw-bold">Database Mitra Aktif</h4>
+            <div>
+                <a href="{{ route('list_mitra.export', request()->query()) }}" class="btn btn-primary">
+                    <i class="bx bx-export"></i> Export CSV
+                </a>
+            </div>
         </div>
 
         {{-- Filter dan Search Section --}}
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
             <div class="card-body">
                 <form action="{{ route('list_mitra') }}" method="GET" class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-7">
                         <label class="form-label small fw-bold">Pencarian</label>
-                        <input type="text" name="search" class="form-control" placeholder="Cari nama atau email..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control uniform-input" placeholder="Cari nama atau email..." value="{{ request('search') }}">
                     </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Kategori Mitra</label>
-                        <select name="kategori" class="form-select">
-                            <option value="">Semua Kategori</option>
-                            <option value="literasi digital" {{ request('kategori') == 'literasi digital' ? 'selected' : '' }}>Literasi Digital</option>
-                            <option value="literasi dasar" {{ request('kategori') == 'literasi dasar' ? 'selected' : '' }}>Literasi Dasar</option>
-                            <option value="literasi bisnis" {{ request('kategori') == 'literasi bisnis' ? 'selected' : '' }}>Literasi Bisnis</option>
-                            <option value="tematik" {{ request('kategori') == 'tematik' ? 'selected' : '' }}>Tematik</option>
-                        </select>
-                    </div>
-
+        
                     <div class="col-md-3">
                         <label class="form-label small fw-bold">Tahun</label>
-                        <select name="tahun" class="form-select">
+                        <select name="tahun" class="form-select uniform-input">
                             <option value="">Semua Tahun</option>
                             @for($year = 2022; $year <= 2025; $year++)
                                 <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -81,7 +75,7 @@
                             <td class="small">{{ $mitra->user->email ?? '-' }}</td>
                             <td>{{ $mitra->no_telepon }}</td>
                             <td class="text-center">
-                                <a href="{{ route('mitra.detail', $mitra->id) }}" class="btn btn-light btn-sm rounded-pill">
+                                <a href="{{ route('mitra.detail', $mitra->id) }}" class="btn btn-light btn-sm rounded-pill text-primary text-decoration-none fw-semibold">
                                     <i class="bx bx-show"></i> Detail
                                 </a>
                             </td>

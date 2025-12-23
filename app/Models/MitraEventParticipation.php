@@ -18,7 +18,8 @@ class MitraEventParticipation extends Model
         'waktu_pelatihan',
         'tempat_pelatihan',
         'narasumber',
-        'status'
+        'status',
+        'kategori'
     ];
 
     public function mitra()

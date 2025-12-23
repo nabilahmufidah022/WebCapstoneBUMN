@@ -468,3 +468,6 @@ main {
     border-radius: 12px;
     font-size: 0.75rem;
 }
+.uniform-input {
+    height: 38px;
+}

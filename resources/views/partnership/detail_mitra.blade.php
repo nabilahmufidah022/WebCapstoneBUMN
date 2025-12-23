@@ -51,7 +51,7 @@
               <i class="bi bi-building"></i>
             </div>
             <div>
-              <small class="text-muted">Nama Mitra</small>
+              <small class="text-muted">Nama Perusahaan</small>
               <div class="fw-semibold">{{ $mitra->nama_perusahaan }}</div>
             </div>
           </div>
@@ -61,7 +61,7 @@
               <i class="bi bi-person"></i>
             </div>
             <div>
-              <small class="text-muted">Nama Pemilik</small>
+              <small class="text-muted">Nama PIC</small>
               <div class="fw-semibold">{{ $mitra->nama_lengkap }}</div>
             </div>
           </div>
@@ -71,7 +71,7 @@
               <i class="bi bi-envelope"></i>
             </div>
             <div>
-              <small class="text-muted">Email</small>
+              <small class="text-muted">Email PIC</small>
               <div class="fw-semibold">{{ $mitra->user->email }}</div>
             </div>
           </div>
@@ -81,7 +81,7 @@
               <i class="bi bi-telephone"></i>
             </div>
             <div>
-              <small class="text-muted">Telepon</small>
+              <small class="text-muted">No. Telepon PIC</small>
               <div class="fw-semibold">{{ $mitra->no_telepon }}</div>
             </div>
           </div>

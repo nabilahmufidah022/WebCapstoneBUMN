@@ -11,29 +11,114 @@ use Illuminate\Http\Request;
 
 class MitraParticipationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $mitra_id = Mitra::where('user_id', $user->id)->value('id');
 
+        $query = MitraEventParticipation::with('mitra')->orderBy('tanggal_pelatihan', 'desc');
 
-        if ($user->usertype === 'admin') {
-            $participations = MitraEventParticipation::with('mitra')
-                ->orderBy('tanggal_pelatihan', 'desc')
-                ->get();
-        } 
-        else {
-            $participations = MitraEventParticipation::with('mitra')
-                ->where('mitra_id', $mitra_id)
-                ->orderBy('tanggal_pelatihan', 'desc')
-                ->get();
+        // Non-admin users only see their own participations
+        if ($user->usertype !== 'admin') {
+            $query->where('mitra_id', $mitra_id);
         }
 
+        // Search by judul_pelatihan or mitra nama_perusahaan
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul_pelatihan', 'like', "%{$search}%")
+                  ->orWhereHas('mitra', function ($m) use ($search) {
+                      $m->where('nama_perusahaan', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by participation kategori
+        if ($request->filled('kategori')) {
+            $kategori = $request->kategori;
+            $query->where('kategori', $kategori);
+        }
+        
+        if ($request->filled('tahun')) {
+                $query->whereYear('created_at', $request->tahun);
+            }
+
+        $participations = $query->get();
+
         $mitras = Mitra::all();
+        // $categories = Mitra::whereNotNull('kategori_mitra')->distinct()->pluck('kategori_mitra');
 
         return view('partnership.participation_list', compact('participations', 'mitras'));
     }
 
+    /**
+     * Export participations as CSV (admin only). Honors search, kategori, and tahun filters.
+     */
+    public function export(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || $user->usertype !== 'admin') {
+            abort(403);
+        }
+
+        $query = MitraEventParticipation::with('mitra')->orderBy('tanggal_pelatihan', 'desc');
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul_pelatihan', 'like', "%{$search}%")
+                  ->orWhereHas('mitra', function ($m) use ($search) {
+                      $m->where('nama_perusahaan', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Kategori
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        // Tahun (created_at)
+        if ($request->filled('tahun')) {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
+        $participations = $query->get();
+
+        $filename = 'keikutsertaan_mitra_' . now()->format('Ymd_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $columns = ['Nama Mitra', 'Judul Pelatihan', 'Tanggal Pelatihan', 'Waktu', 'Tempat', 'Narasumber', 'Status', 'Kategori', 'Didaftarkan Pada'];
+
+        $callback = function () use ($participations, $columns) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, $columns);
+
+            foreach ($participations as $p) {
+                $row = [
+                    $p->mitra->nama_perusahaan ?? '',
+                    $p->judul_pelatihan,
+                    $p->tanggal_pelatihan,
+                    $p->waktu_pelatihan,
+                    $p->tempat_pelatihan,
+                    $p->narasumber,
+                    $p->status,
+                    $p->kategori ?? '',
+                    $p->created_at->toDateTimeString(),
+                ];
+                fputcsv($out, $row);
+            }
+
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
     public function store(Request $request)
     {
         $request->validate([
@@ -44,6 +129,7 @@ class MitraParticipationController extends Controller
             'tempat_pelatihan' => 'required|string|max:255',
             'narasumber' => 'required|string|max:255',
             'status' => 'required|in:online,offline',
+            'kategori' => 'required|string',
         ]);
 
         MitraEventParticipation::create([
@@ -54,6 +140,7 @@ class MitraParticipationController extends Controller
             'tempat_pelatihan' => $request->tempat_pelatihan,
             'narasumber' => $request->narasumber,
             'status' => $request->status,
+            'kategori' => $request->kategori,
         ]);
 
         return redirect()
