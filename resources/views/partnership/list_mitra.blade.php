@@ -42,11 +42,13 @@
                         </select>
                     </div>
 
+                    {{-- UPDATE: GANTI TOMBOL FILTER JADI CARI --}}
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-secondary w-100">
-                            <i class="bx bx-filter-alt"></i> Filter
+                            <i class="bx bx-search"></i> Cari
                         </button>
                     </div>
+                    {{-- ====================================== --}}
                 </form>
             </div>
         </div>
@@ -58,7 +60,7 @@
                     <thead class="table-light">
                         <tr>
                             <th class="border-0">Nama Perusahaan</th>
-                            <th class="border-0">Bidang Perusahaan</th>
+                            <th class="border-0">Bidang</th>
                             <th class="border-0">Lokasi</th>
                             <th class="border-0">PIC Mitra</th>
                             <th class="border-0">Email</th>
@@ -70,10 +72,7 @@
                         @forelse($mitras as $mitra)
                         <tr>
                             <td class="fw-bold text-primary">{{ $mitra->nama_perusahaan }}</td>
-                            
-                            {{-- UPDATE 1: Menampilkan data dari kolom 'bidang_perusahaan' --}}
                             <td>{{ $mitra->bidang_perusahaan ?? '-' }}</td>
-                            
                             <td><i class="bx bx-map"></i> {{ $mitra->lokasi_perusahaan }}</td>
                             <td>{{ $mitra->nama_lengkap }}</td>
                             <td class="small">{{ $mitra->user->email ?? '-' }}</td>
@@ -206,9 +205,9 @@
                         <input type="text" name="nama_perusahaan" class="form-control" placeholder="Nama usaha/startup" required>
                     </div>
 
-                    {{-- UPDATE 2: Input name diganti jadi "bidang_perusahaan" agar sesuai Controller & Database --}}
+                    {{-- UPDATE: Name sudah disesuaikan dengan database "bidang_perusahaan" --}}
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Bidang Perusahaan</label>
+                        <label class="form-label fw-bold small">Bidang Mitra</label>
                         <input type="text" name="bidang_perusahaan" class="form-control" placeholder="Contoh: Teknologi, Pendidikan, Kuliner, dll." required>
                     </div>
                     {{-- ==================================================== --}}
