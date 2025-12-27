@@ -4,19 +4,19 @@
 
 <div class="container py-4">
 
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
+    @if(session('success')) 
+    <div class="alert alert-success alert-dismissible fade show" role="alert"> 
+        {{ session('success') }} 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
+    </div> 
+    @endif 
 
     {{-- ================= TAMPILAN KHUSUS ADMIN ================= --}}
     @if($user->usertype == 'admin')
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4"> 
             <h4 class="fw-bold">Database Mitra Aktif</h4>
             <div>
-                {{-- MODIFIKASI 1: Tombol diubah untuk memicu Modal, bukan langsung href --}}
+                {{-- Tombol Export memicu Modal Preview --}}
                 <button type="button" class="btn btn-primary" onclick="openPreviewModal()">
                     <i class="bx bx-export"></i> Export CSV
                 </button>
@@ -31,7 +31,7 @@
                         <label class="form-label small fw-bold">Pencarian</label>
                         <input type="text" name="search" class="form-control uniform-input" placeholder="Cari nama atau email..." value="{{ request('search') }}">
                     </div>
-
+        
                     <div class="col-md-3">
                         <label class="form-label small fw-bold">Tahun</label>
                         <select name="tahun" class="form-select uniform-input">
@@ -54,12 +54,11 @@
         {{-- Table Section --}}
         <div class="card border-0 shadow-sm" style="border-radius: 12px;">
             <div class="table-responsive p-3">
-                {{-- Tambahkan ID 'mainTable' agar mudah diambil JS --}}
                 <table class="table table-hover align-middle" id="mainTable">
                     <thead class="table-light">
                         <tr>
                             <th class="border-0">Nama Perusahaan</th>
-                            <th class="border-0">Bidang</th>
+                            <th class="border-0">Bidang Perusahaan</th>
                             <th class="border-0">Lokasi</th>
                             <th class="border-0">PIC Mitra</th>
                             <th class="border-0">Email</th>
@@ -71,7 +70,10 @@
                         @forelse($mitras as $mitra)
                         <tr>
                             <td class="fw-bold text-primary">{{ $mitra->nama_perusahaan }}</td>
-                            <td>{{ $mitra->bidang_usaha ?? '-' }}</td>
+                            
+                            {{-- UPDATE 1: Menampilkan data dari kolom 'bidang_perusahaan' --}}
+                            <td>{{ $mitra->bidang_perusahaan ?? '-' }}</td>
+                            
                             <td><i class="bx bx-map"></i> {{ $mitra->lokasi_perusahaan }}</td>
                             <td>{{ $mitra->nama_lengkap }}</td>
                             <td class="small">{{ $mitra->user->email ?? '-' }}</td>
@@ -97,12 +99,12 @@
 
     {{-- ================= TAMPILAN KHUSUS USER ================= --}}
     @else
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4"> 
             <h4 class="fw-bold">Status Pendaftaran Mitra Anda</h4>
             @if(!$hasMitra)
                 <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#daftarMitraModal">
                     <i class="bx bx-plus"></i> Daftar Mitra Baru
-                </button>
+                </button> 
             @endif
         </div>
 
@@ -146,10 +148,10 @@
     @endif
 </div>
 
-{{-- MODIFIKASI 2: Modal Preview Export (Khusus Admin) --}}
+{{-- Modal Preview Export (Khusus Admin) --}}
 @if($user->usertype == 'admin')
 <div class="modal fade" id="exportPreviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl"> {{-- Pakai modal-xl agar tabel muat --}}
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">Preview Data Export</h5>
@@ -160,7 +162,6 @@
                     <i class="bx bx-info-circle"></i> Berikut adalah pratinjau data yang akan diunduh ke file CSV sesuai dengan filter pencarian Anda.
                 </div>
                 <div class="table-responsive">
-                    {{-- Tabel kosong yang akan diisi Javascript --}}
                     <table class="table table-bordered table-sm table-striped" id="previewTableContent">
                         <thead class="table-light"></thead>
                         <tbody></tbody>
@@ -169,7 +170,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                {{-- Link ini akan diupdate otomatis oleh Javascript --}}
                 <a href="#" id="btnRealDownload" class="btn btn-success">
                     <i class="bx bx-download"></i> Download CSV Sekarang
                 </a>
@@ -194,24 +194,32 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold small">Nama Lengkap PIC</label>
-                            <input type="text" name="nama_lengkap" class="form-control" required>
+                            <input type="text" name="nama_lengkap" class="form-control" placeholder="Nama penanggung jawab" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold small">No. Telepon PIC</label>
-                            <input type="text" name="no_telepon" class="form-control" required>
+                            <input type="text" name="no_telepon" class="form-control" placeholder="08..." required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Nama Perusahaan</label>
-                        <input type="text" name="nama_perusahaan" class="form-control" required>
+                        <input type="text" name="nama_perusahaan" class="form-control" placeholder="Nama usaha/startup" required>
                     </div>
+
+                    {{-- UPDATE 2: Input name diganti jadi "bidang_perusahaan" agar sesuai Controller & Database --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Bidang Perusahaan</label>
+                        <input type="text" name="bidang_perusahaan" class="form-control" placeholder="Contoh: Teknologi, Pendidikan, Kuliner, dll." required>
+                    </div>
+                    {{-- ==================================================== --}}
+
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Lokasi Perusahaan</label>
-                        <input type="text" name="lokasi_perusahaan" class="form-control" required>
+                        <input type="text" name="lokasi_perusahaan" class="form-control" placeholder="Alamat lengkap" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Deskripsi Singkat</label>
-                        <textarea name="deskripsi_perusahaan" class="form-control" rows="3" required></textarea>
+                        <textarea name="deskripsi_perusahaan" class="form-control" rows="3" placeholder="Jelaskan singkat tentang usaha Anda..." required></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -234,39 +242,35 @@
 </div>
 @endif
 
-{{-- MODIFIKASI 3: Script Javascript --}}
+{{-- Script Javascript Logic --}}
 @if($user->usertype == 'admin')
 <script>
     function openPreviewModal() {
-        // 1. Ambil elemen tabel utama dan tabel preview
         var sourceTable = document.getElementById('mainTable');
         var targetHead = document.querySelector('#previewTableContent thead');
         var targetBody = document.querySelector('#previewTableContent tbody');
 
         if(sourceTable) {
-            // 2. Clone (Salin) isi Header dan Body ke dalam Modal
+            // Copy Header & Body
             targetHead.innerHTML = sourceTable.querySelector('thead').innerHTML;
             targetBody.innerHTML = sourceTable.querySelector('tbody').innerHTML;
 
-            // (Opsional) Menghapus Kolom "Aksi" di dalam Preview agar terlihat seperti laporan
-            // Kita hapus kolom terakhir (th terakhir dan td terakhir di setiap baris)
+            // Hapus kolom 'Aksi' di header preview
             var headRow = targetHead.querySelector('tr');
-            if(headRow && headRow.lastElementChild) headRow.lastElementChild.remove(); // Hapus Header Aksi
+            if(headRow && headRow.lastElementChild) headRow.lastElementChild.remove(); 
 
+            // Hapus tombol 'Detail' di body preview
             var bodyRows = targetBody.querySelectorAll('tr');
             bodyRows.forEach(function(row) {
-                if(row.lastElementChild) row.lastElementChild.remove(); // Hapus Tombol Detail
+                if(row.lastElementChild) row.lastElementChild.remove(); 
             });
 
-            // 3. Update Link Download agar membawa Filter (Tahun/Search)
-            // window.location.search otomatis mengambil "?search=...&tahun=..." dari URL browser
-            var currentParams = window.location.search;
+            // Update Link Download dengan filter
+            var currentParams = window.location.search; 
             var baseUrl = "{{ route('list_mitra.export') }}";
-
-            // Gabungkan URL Export dengan parameter filter yang sedang aktif
             document.getElementById('btnRealDownload').href = baseUrl + currentParams;
 
-            // 4. Tampilkan Modal (Menggunakan Bootstrap 5)
+            // Show Modal
             var myModal = new bootstrap.Modal(document.getElementById('exportPreviewModal'));
             myModal.show();
         }

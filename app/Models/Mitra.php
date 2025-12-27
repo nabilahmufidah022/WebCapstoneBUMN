@@ -9,13 +9,14 @@ class Mitra extends Model
 {
     use HasFactory;
 
-    protected $table = 'mitra';
+    protected $table = 'mitra'; // Pastikan nama tabel di database 'mitra' atau 'mitras'
 
     protected $fillable = [
         'user_id',
         'nama_lengkap',
         'no_telepon',
         'nama_perusahaan',
+        'bidang_perusahaan', // <--- WAJIB DITAMBAHKAN DI SINI
         'lokasi_perusahaan',
         'deskripsi_perusahaan',
         'company_profile',
@@ -28,6 +29,7 @@ class Mitra extends Model
         return $this->belongsTo(User::class);
     }
     
+    // Relasi ini sepertinya tidak perlu jika tidak ada parent mitra, tapi biarkan saja jika memang dipakai
     public function mitra()
     {
         return $this->belongsTo(Mitra::class, 'mitra_id');
