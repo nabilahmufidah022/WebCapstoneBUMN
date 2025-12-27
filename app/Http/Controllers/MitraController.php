@@ -220,7 +220,7 @@ class MitraController extends Controller
             foreach ($mitras as $m) {
                 $row = [
                     $m->nama_perusahaan,
-                    $m->bidang_perusahaan ?? '-', // UPDATE: Pastikan ini bidang_perusahaan
+                    $m->bidang_perusahaan?? '-', // UPDATE: Pastikan ini bidang_perusahaan
                     $m->nama_lengkap ?? '',
                     $m->user->email ?? '',
                     $m->no_telepon ?? '',
