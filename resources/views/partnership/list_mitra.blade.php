@@ -4,21 +4,22 @@
 
 <div class="container py-4">
 
-    @if(session('success')) 
-    <div class="alert alert-success alert-dismissible fade show" role="alert"> 
-        {{ session('success') }} 
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div> 
-    @endif 
+    </div>
+    @endif
 
     {{-- ================= TAMPILAN KHUSUS ADMIN ================= --}}
     @if($user->usertype == 'admin')
-        <div class="d-flex justify-content-between align-items-center mb-4"> 
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold">Database Mitra Aktif</h4>
             <div>
-                <a href="{{ route('list_mitra.export', request()->query()) }}" class="btn btn-primary">
+                {{-- MODIFIKASI 1: Tombol diubah untuk memicu Modal, bukan langsung href --}}
+                <button type="button" class="btn btn-primary" onclick="openPreviewModal()">
                     <i class="bx bx-export"></i> Export CSV
-                </a>
+                </button>
             </div>
         </div>
 
@@ -30,7 +31,7 @@
                         <label class="form-label small fw-bold">Pencarian</label>
                         <input type="text" name="search" class="form-control uniform-input" placeholder="Cari nama atau email..." value="{{ request('search') }}">
                     </div>
-        
+
                     <div class="col-md-3">
                         <label class="form-label small fw-bold">Tahun</label>
                         <select name="tahun" class="form-select uniform-input">
@@ -53,7 +54,8 @@
         {{-- Table Section --}}
         <div class="card border-0 shadow-sm" style="border-radius: 12px;">
             <div class="table-responsive p-3">
-                <table class="table table-hover align-middle">
+                {{-- Tambahkan ID 'mainTable' agar mudah diambil JS --}}
+                <table class="table table-hover align-middle" id="mainTable">
                     <thead class="table-light">
                         <tr>
                             <th class="border-0">Nama Perusahaan</th>
@@ -95,12 +97,12 @@
 
     {{-- ================= TAMPILAN KHUSUS USER ================= --}}
     @else
-        <div class="d-flex justify-content-between align-items-center mb-4"> 
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold">Status Pendaftaran Mitra Anda</h4>
             @if(!$hasMitra)
                 <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#daftarMitraModal">
                     <i class="bx bx-plus"></i> Daftar Mitra Baru
-                </button> 
+                </button>
             @endif
         </div>
 
@@ -143,6 +145,39 @@
         @endforelse
     @endif
 </div>
+
+{{-- MODIFIKASI 2: Modal Preview Export (Khusus Admin) --}}
+@if($user->usertype == 'admin')
+<div class="modal fade" id="exportPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> {{-- Pakai modal-xl agar tabel muat --}}
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Preview Data Export</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info small mb-3">
+                    <i class="bx bx-info-circle"></i> Berikut adalah pratinjau data yang akan diunduh ke file CSV sesuai dengan filter pencarian Anda.
+                </div>
+                <div class="table-responsive">
+                    {{-- Tabel kosong yang akan diisi Javascript --}}
+                    <table class="table table-bordered table-sm table-striped" id="previewTableContent">
+                        <thead class="table-light"></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                {{-- Link ini akan diupdate otomatis oleh Javascript --}}
+                <a href="#" id="btnRealDownload" class="btn btn-success">
+                    <i class="bx bx-download"></i> Download CSV Sekarang
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- Modal Daftar Mitra (Tetap ada untuk User) --}}
 @if($user->usertype != 'admin' && !$hasMitra)
@@ -197,6 +232,46 @@
         </div>
     </div>
 </div>
+@endif
+
+{{-- MODIFIKASI 3: Script Javascript --}}
+@if($user->usertype == 'admin')
+<script>
+    function openPreviewModal() {
+        // 1. Ambil elemen tabel utama dan tabel preview
+        var sourceTable = document.getElementById('mainTable');
+        var targetHead = document.querySelector('#previewTableContent thead');
+        var targetBody = document.querySelector('#previewTableContent tbody');
+
+        if(sourceTable) {
+            // 2. Clone (Salin) isi Header dan Body ke dalam Modal
+            targetHead.innerHTML = sourceTable.querySelector('thead').innerHTML;
+            targetBody.innerHTML = sourceTable.querySelector('tbody').innerHTML;
+
+            // (Opsional) Menghapus Kolom "Aksi" di dalam Preview agar terlihat seperti laporan
+            // Kita hapus kolom terakhir (th terakhir dan td terakhir di setiap baris)
+            var headRow = targetHead.querySelector('tr');
+            if(headRow && headRow.lastElementChild) headRow.lastElementChild.remove(); // Hapus Header Aksi
+
+            var bodyRows = targetBody.querySelectorAll('tr');
+            bodyRows.forEach(function(row) {
+                if(row.lastElementChild) row.lastElementChild.remove(); // Hapus Tombol Detail
+            });
+
+            // 3. Update Link Download agar membawa Filter (Tahun/Search)
+            // window.location.search otomatis mengambil "?search=...&tahun=..." dari URL browser
+            var currentParams = window.location.search;
+            var baseUrl = "{{ route('list_mitra.export') }}";
+
+            // Gabungkan URL Export dengan parameter filter yang sedang aktif
+            document.getElementById('btnRealDownload').href = baseUrl + currentParams;
+
+            // 4. Tampilkan Modal (Menggunakan Bootstrap 5)
+            var myModal = new bootstrap.Modal(document.getElementById('exportPreviewModal'));
+            myModal.show();
+        }
+    }
+</script>
 @endif
 
 @endsection
