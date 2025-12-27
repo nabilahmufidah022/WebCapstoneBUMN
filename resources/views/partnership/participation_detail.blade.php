@@ -59,23 +59,40 @@
             </div>
 
             <!-- FOOTER -->
-            <div class="mt-4 pt-3 border-top" style="position: relative; z-index: 10;">
-                <a href="{{ route('mitra.participation.index') }}"
-                   class="btn btn-outline-secondary rounded-pill px-4">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali
-                </a>
-                {{-- User Feedback Button (Goes to Admin Section as requested) --}}
-                <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'admin']) }}"
-                   class="btn btn-success rounded-pill px-4 ms-2">
-                    <i class="bi bi-chat-left-text me-1"></i>Feedback
-                </a>
-                {{-- Admin Feedback Button (Goes to User Section as requested) --}}
-                <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'user']) }}" class="btn btn-outline-primary rounded-pill px-4 ms-2">
-                    <i class="bi bi-eye me-1"></i> Lihat Feedback
-                </a>
+            <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center"
+                style="position: relative; z-index: 10;">
+
+                <!-- LEFT ACTION -->
+                <div>
+                    <a href="{{ route('mitra.participation.index') }}"
+                    class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali
+                    </a>
+
+                    <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'admin']) }}"
+                    class="btn btn-success rounded-pill px-4 ms-2">
+                        <i class="bi bi-chat-left-text me-1"></i> Feedback
+                    </a>
+
+                    <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'user']) }}"
+                    class="btn btn-outline-primary rounded-pill px-4 ms-2">
+                        <i class="bi bi-eye me-1"></i> Lihat Feedback
+                    </a>
+                </div>
+
+                <!-- RIGHT ACTION (DANGER) -->
+                <form action="{{ route('mitra.participation.destroy', $participation->id) }}"
+                    method="POST"
+                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus keikutsertaan mitra ini?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger rounded-pill px-4">
+                        <i class="bi bi-trash me-1"></i> Hapus Keikutsertaan
+                    </button>
+                </form>
+
             </div>
 
-            {{-- Feedback section removed from detail page per request --}}
 
         </div>
     </div>

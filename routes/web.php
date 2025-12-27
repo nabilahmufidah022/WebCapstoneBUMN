@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/mitra/participation/{id}/feedback', [MitraParticipationController::class, 'feedback'])->name('mitra.participation.feedback');
     Route::post('/mitra/participation/{id}/feedback', [MitraParticipationController::class, 'storeFeedback'])->name('mitra.participation.feedback.store');
     Route::post('/mitra/participation/feedback/{id}/reply', [MitraParticipationController::class, 'replyFeedback'])->name('mitra.participation.feedback.reply');
+    Route::delete('/mitra/participation/{id}', [MitraParticipationController::class, 'destroy'])->name('mitra.participation.destroy');
 
     Route::get('profile',[UserController::class,'profile'])->name('profile');
     Route::post('profile',[UserController::class,'updateProfile'])->name('updateProfile');

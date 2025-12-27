@@ -92,7 +92,7 @@ body.dark {
 /* sidebar */
 .sidebar {
   background-color: var(--white-color);
-  width: 260px;
+  width: 300px;
   position: fixed;
   top: 0;
   left: 0;
@@ -343,7 +343,7 @@ body.dark {
 /* main content adjustment */
 main {
   margin-top: 80px;
-  margin-left: 260px;
+  margin-left: 300px;
   padding: 20px;
   transition: margin-left 0.5s ease;
 }
@@ -471,3 +471,4 @@ main {
 .uniform-input {
     height: 38px;
 }
+
