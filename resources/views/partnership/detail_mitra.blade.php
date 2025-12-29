@@ -46,6 +46,7 @@
       <div class="card-body">
         <div class="row g-4">
 
+          {{-- NAMA PERUSAHAAN --}}
           <div class="col-md-6 info-item">
             <div class="icon bg-primary-soft">
               <i class="bi bi-building"></i>
@@ -55,6 +56,18 @@
               <div class="fw-semibold">{{ $mitra->nama_perusahaan }}</div>
             </div>
           </div>
+
+          {{-- === BAGIAN BARU: BIDANG MITRA === --}}
+          <div class="col-md-6 info-item">
+            <div class="icon bg-info-soft">
+              <i class="bi bi-tags"></i>
+            </div>
+            <div>
+              <small class="text-muted">Bidang Perusahaan</small>
+              <div class="fw-semibold">{{ $mitra->bidang_perusahaan ?? '-' }}</div>
+            </div>
+          </div>
+          {{-- ================================ --}}
 
           <div class="col-md-6 info-item">
             <div class="icon bg-purple-soft">
@@ -72,7 +85,7 @@
             </div>
             <div>
               <small class="text-muted">Email PIC</small>
-              <div class="fw-semibold">{{ $mitra->user->email }}</div>
+              <div class="fw-semibold">{{ $mitra->user->email ?? '-' }}</div>
             </div>
           </div>
 
@@ -115,7 +128,11 @@
             <div>
               <small class="text-muted">Company Profile</small>
               <div class="fw-semibold">
-                <a href="{{ asset('uploads/mitra/' . $mitra->company_profile) }}" target="_blank">Download</a>
+                @if($mitra->company_profile)
+                  <a href="{{ asset('uploads/mitra/' . $mitra->company_profile) }}" target="_blank">Download</a>
+                @else
+                  <span class="text-muted small">-</span>
+                @endif
               </div>
             </div>
           </div>
@@ -127,7 +144,11 @@
             <div>
               <small class="text-muted">Surat Permohonan Audiensi:</small>
               <div class="fw-semibold">
-                <a href="{{ asset('uploads/mitra/' . $mitra->surat_permohonan_audiensi) }}" target="_blank">Download</a>
+                @if($mitra->surat_permohonan_audiensi)
+                   <a href="{{ asset('uploads/mitra/' . $mitra->surat_permohonan_audiensi) }}" target="_blank">Download</a>
+                @else
+                   <span class="text-muted small">-</span>
+                @endif
               </div>
             </div>
           </div>
@@ -137,16 +158,10 @@
               <i class="bi bi-briefcase"></i>
             </div>
             <div>
-              <small class="text-muted">deskripsi perusahaan</small>
+              <small class="text-muted">Deskripsi Perusahaan</small>
               <div class="fw-semibold">{{ $mitra->deskripsi_perusahaan }}</div>
             </div>
           </div>
-
-          
-
-          
-
-          
 
         </div>
       </div>
@@ -293,7 +308,6 @@
 .bg-info-soft { background: #e8f6f8; color: #0dcaf0; }
 .bg-purple-soft { background: #f1e9ff; color: #6f42c1; }
 .bg-secondary-soft { background: #f1f3f5; color: #6c757d; }
-.bg-warning-soft { background: #fff4e5; color: #fd7e14; }
 .bg-green-soft { background: #ECF4E8; color: #005461; }
 
 
@@ -317,6 +331,16 @@
   color: #198754;
 }
 
+.status-pill.pending {
+    background: #fff4e5;
+    color: #fd7e14;
+}
+
+.status-pill.rejected {
+    background: #fdecea;
+    color: #dc3545;
+}
+
 .active-box {
   border: 1px solid #b7ebc6;
   background: #f0fff4;
@@ -324,6 +348,18 @@
   padding: 18px;
   color: #198754;
   font-size: 22px;
+}
+
+.active-box.pending-box {
+    border: 1px solid #ffeeba;
+    background: #fff3cd;
+    color: #856404;
+}
+
+.active-box.rejected-box {
+    border: 1px solid #f5c6cb;
+    background: #f8d7da;
+    color: #721c24;
 }
 
 /* Timeline */

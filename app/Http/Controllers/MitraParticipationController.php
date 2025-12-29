@@ -237,4 +237,15 @@ class MitraParticipationController extends Controller
 
         return redirect()->back()->with('success', 'Balasan terkirim.');
     }
+
+    public function destroy($id)
+    {
+        $participation = MitraEventParticipation::findOrFail($id);
+        $participation->delete();
+
+        return redirect()
+            ->route('mitra.participation.index')
+            ->with('success', 'Keikutsertaan mitra berhasil dihapus.');
+    }
+
 }
