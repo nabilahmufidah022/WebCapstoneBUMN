@@ -17,7 +17,7 @@ class MitraController extends Controller
     public function goListMitra(Request $request)
     {
         $user = Auth::user();
-        
+
         if ($user->usertype == 'admin') {
             // LOGIKA ADMIN: Ambil semua mitra yang sudah disetujui (status 1)
             $query = Mitra::with('user')->where('status', 1);
@@ -32,7 +32,7 @@ class MitraController extends Controller
                 });
             }
 
-            // Filter Kategori Mitra
+            // Filter Kategori Mitra (Jika ada kolom kategori_mitra)
             if ($request->filled('kategori')) {
                 $query->where('kategori_mitra', $request->kategori);
             }
@@ -70,7 +70,7 @@ class MitraController extends Controller
 
         // Ambil mitra yang statusnya 0 (Pending) untuk diverifikasi
         $mitras = Mitra::with('user')->where('status', 0)->orderBy('created_at', 'asc')->get();
-        
+
         return view('partnership.kelola_pendaftaran', compact('user', 'mitras'));
     }
 
@@ -87,6 +87,10 @@ class MitraController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'no_telepon' => 'required|string|max:20',
             'nama_perusahaan' => 'required|string|max:255',
+            
+            // PERBAIKAN: Ubah validasi agar sesuai nama input di Form (bidang_perusahaan)
+            'bidang_perusahaan' => 'required|string|max:255', 
+            
             'lokasi_perusahaan' => 'required|string|max:255',
             'deskripsi_perusahaan' => 'required|string',
             'company_profile' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
@@ -98,9 +102,13 @@ class MitraController extends Controller
             'nama_lengkap' => $request->nama_lengkap,
             'no_telepon' => $request->no_telepon,
             'nama_perusahaan' => $request->nama_perusahaan,
+            
+            // PERBAIKAN: Ambil dari request->bidang_perusahaan
+            'bidang_perusahaan' => $request->bidang_perusahaan, 
+
             'lokasi_perusahaan' => $request->lokasi_perusahaan,
             'deskripsi_perusahaan' => $request->deskripsi_perusahaan,
-            'status' => 0, 
+            'status' => 0,
         ];
 
         if ($request->hasFile('company_profile')) {
@@ -202,7 +210,8 @@ class MitraController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $columns = ['Nama Perusahaan', 'Nama PIC', 'Email PIC', 'No. HP PIC', 'Lokasi', 'Deskripsi Perusahaan', 'Didaftarkan Pada'];
+        // Header CSV
+        $columns = ['Nama Perusahaan', 'Bidang Mitra', 'Nama PIC', 'Email PIC', 'No. HP PIC', 'Lokasi', 'Deskripsi Perusahaan', 'Didaftarkan Pada'];
 
         $callback = function() use ($mitras, $columns) {
             $file = fopen('php://output', 'w');
@@ -211,6 +220,7 @@ class MitraController extends Controller
             foreach ($mitras as $m) {
                 $row = [
                     $m->nama_perusahaan,
+                    $m->bidang_perusahaan?? '-', // UPDATE: Pastikan ini bidang_perusahaan
                     $m->nama_lengkap ?? '',
                     $m->user->email ?? '',
                     $m->no_telepon ?? '',

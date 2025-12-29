@@ -16,9 +16,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4"> 
             <h4 class="fw-bold">Database Mitra Aktif</h4>
             <div>
-                <a href="{{ route('list_mitra.export', request()->query()) }}" class="btn btn-primary">
+                {{-- Tombol Export memicu Modal Preview --}}
+                <button type="button" class="btn btn-primary" onclick="openPreviewModal()">
                     <i class="bx bx-export"></i> Export CSV
-                </a>
+                </button>
             </div>
         </div>
 
@@ -41,11 +42,13 @@
                         </select>
                     </div>
 
+                    {{-- UPDATE: GANTI TOMBOL FILTER JADI CARI --}}
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-secondary w-100">
-                            <i class="bx bx-filter-alt"></i> Filter
+                            <i class="bx bx-search"></i> Cari
                         </button>
                     </div>
+                    {{-- ====================================== --}}
                 </form>
             </div>
         </div>
@@ -53,7 +56,7 @@
         {{-- Table Section --}}
         <div class="card border-0 shadow-sm" style="border-radius: 12px;">
             <div class="table-responsive p-3">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="mainTable">
                     <thead class="table-light">
                         <tr>
                             <th class="border-0">Nama Perusahaan</th>
@@ -69,7 +72,7 @@
                         @forelse($mitras as $mitra)
                         <tr>
                             <td class="fw-bold text-primary">{{ $mitra->nama_perusahaan }}</td>
-                            <td>{{ $mitra->bidang_usaha ?? '-' }}</td>
+                            <td>{{ $mitra->bidang_perusahaan ?? '-' }}</td>
                             <td><i class="bx bx-map"></i> {{ $mitra->lokasi_perusahaan }}</td>
                             <td>{{ $mitra->nama_lengkap }}</td>
                             <td class="small">{{ $mitra->user->email ?? '-' }}</td>
@@ -144,6 +147,37 @@
     @endif
 </div>
 
+{{-- Modal Preview Export (Khusus Admin) --}}
+@if($user->usertype == 'admin')
+<div class="modal fade" id="exportPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Preview Data Export</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info small mb-3">
+                    <i class="bx bx-info-circle"></i> Berikut adalah pratinjau data yang akan diunduh ke file CSV sesuai dengan filter pencarian Anda.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm table-striped" id="previewTableContent">
+                        <thead class="table-light"></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <a href="#" id="btnRealDownload" class="btn btn-success">
+                    <i class="bx bx-download"></i> Download CSV Sekarang
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Modal Daftar Mitra (Tetap ada untuk User) --}}
 @if($user->usertype != 'admin' && !$hasMitra)
 <div class="modal fade" id="daftarMitraModal" tabindex="-1" aria-labelledby="daftarMitraModalLabel" aria-hidden="true">
@@ -159,24 +193,32 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold small">Nama Lengkap PIC</label>
-                            <input type="text" name="nama_lengkap" class="form-control" required>
+                            <input type="text" name="nama_lengkap" class="form-control" placeholder="Nama penanggung jawab" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold small">No. Telepon PIC</label>
-                            <input type="text" name="no_telepon" class="form-control" required>
+                            <input type="text" name="no_telepon" class="form-control" placeholder="08..." required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Nama Perusahaan</label>
-                        <input type="text" name="nama_perusahaan" class="form-control" required>
+                        <input type="text" name="nama_perusahaan" class="form-control" placeholder="Nama usaha/startup" required>
                     </div>
+
+                    {{-- UPDATE: Name sudah disesuaikan dengan database "bidang_perusahaan" --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Bidang Mitra</label>
+                        <input type="text" name="bidang_perusahaan" class="form-control" placeholder="Contoh: Teknologi, Pendidikan, Kuliner, dll." required>
+                    </div>
+                    {{-- ==================================================== --}}
+
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Lokasi Perusahaan</label>
-                        <input type="text" name="lokasi_perusahaan" class="form-control" required>
+                        <input type="text" name="lokasi_perusahaan" class="form-control" placeholder="Alamat lengkap" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Deskripsi Singkat</label>
-                        <textarea name="deskripsi_perusahaan" class="form-control" rows="3" required></textarea>
+                        <textarea name="deskripsi_perusahaan" class="form-control" rows="3" placeholder="Jelaskan singkat tentang usaha Anda..." required></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -197,6 +239,42 @@
         </div>
     </div>
 </div>
+@endif
+
+{{-- Script Javascript Logic --}}
+@if($user->usertype == 'admin')
+<script>
+    function openPreviewModal() {
+        var sourceTable = document.getElementById('mainTable');
+        var targetHead = document.querySelector('#previewTableContent thead');
+        var targetBody = document.querySelector('#previewTableContent tbody');
+
+        if(sourceTable) {
+            // Copy Header & Body
+            targetHead.innerHTML = sourceTable.querySelector('thead').innerHTML;
+            targetBody.innerHTML = sourceTable.querySelector('tbody').innerHTML;
+
+            // Hapus kolom 'Aksi' di header preview
+            var headRow = targetHead.querySelector('tr');
+            if(headRow && headRow.lastElementChild) headRow.lastElementChild.remove(); 
+
+            // Hapus tombol 'Detail' di body preview
+            var bodyRows = targetBody.querySelectorAll('tr');
+            bodyRows.forEach(function(row) {
+                if(row.lastElementChild) row.lastElementChild.remove(); 
+            });
+
+            // Update Link Download dengan filter
+            var currentParams = window.location.search; 
+            var baseUrl = "{{ route('list_mitra.export') }}";
+            document.getElementById('btnRealDownload').href = baseUrl + currentParams;
+
+            // Show Modal
+            var myModal = new bootstrap.Modal(document.getElementById('exportPreviewModal'));
+            myModal.show();
+        }
+    }
+</script>
 @endif
 
 @endsection

@@ -9,13 +9,14 @@ class Mitra extends Model
 {
     use HasFactory;
 
-    protected $table = 'mitra';
+    protected $table = 'mitra'; // Pastikan nama tabel di database 'mitra' atau 'mitras'
 
     protected $fillable = [
         'user_id',
         'nama_lengkap',
         'no_telepon',
         'nama_perusahaan',
+        'bidang_perusahaan', // <--- WAJIB DITAMBAHKAN DI SINI
         'lokasi_perusahaan',
         'deskripsi_perusahaan',
         'company_profile',
