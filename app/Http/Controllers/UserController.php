@@ -49,7 +49,30 @@ class UserController extends Controller
 
     public function goDashboard(){
         $user = Auth::user();
-        return view('partnership.dashboard', compact('user'));
+
+        if ($user->usertype === 'admin') {
+            // Admin dashboard data
+            $totalMitra = \App\Models\Mitra::count();
+            $pendingMitra = \App\Models\Mitra::where('status', 'pending')->count();
+            $approvedMitra = \App\Models\Mitra::where('status', 'approved')->count();
+            $totalParticipations = \App\Models\MitraEventParticipation::count();
+            $recentParticipations = \App\Models\MitraEventParticipation::with('mitra')->latest()->take(5)->get();
+
+            return view('partnership.dashboard', compact(
+                'user',
+                'totalMitra',
+                'pendingMitra',
+                'approvedMitra',
+                'totalParticipations',
+                'recentParticipations'
+            ));
+        } else {
+            // User dashboard data
+            $mitra = $user->mitra; // Assuming relationship exists
+            $participations = $mitra ? $mitra->mitraEventParticipations()->latest()->take(5)->get() : collect();
+
+            return view('partnership.dashboard', compact('user', 'mitra', 'participations'));
+        }
     }
 
     public function profile(){

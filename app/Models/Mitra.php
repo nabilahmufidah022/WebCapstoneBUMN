@@ -27,7 +27,12 @@ class Mitra extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
+    public function mitraEventParticipations()
+    {
+        return $this->hasMany(MitraEventParticipation::class);
+    }
+
     public function mitra()
     {
         return $this->belongsTo(Mitra::class, 'mitra_id');
