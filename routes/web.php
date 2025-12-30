@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::get('account/{id}/edit',[UserController::class,'editAccount'])->name('account.edit');
     Route::put('account/{id}',[UserController::class,'updateAccount'])->name('account.update');
     Route::delete('account/{id}',[UserController::class,'deleteAccount'])->name('account.delete');
+    Route::delete('account/{id}/destroy', [UserController::class, 'destroyPermanently'])->name('account.destroy');
 });
 Route::get('account/{id}/edit',[UserController::class,'editAccount'])->name('account.edit');
 Route::put('account/{id}',[UserController::class,'updateAccount'])->name('account.update');
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('profile',[UserController::class,'profile'])->name('profile');
     Route::post('profile',[UserController::class,'updateProfile'])->name('updateProfile');
+    Route::delete('profile',[UserController::class,'destroySelf'])->name('profile.destroy');
     Route::get('settings',[UserController::class,'settings'])->name('settings');
     Route::post('change-password',[UserController::class,'changePassword'])->name('changePassword');
     Route::post('logout',[UserController::class,'logout'])->name('logout');

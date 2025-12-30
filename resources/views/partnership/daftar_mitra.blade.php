@@ -29,6 +29,11 @@
         </div>
 
         <div class="form-group">
+            <label for="bidang_perusahaan">Bidang Perusahaan</label>
+            <input type="text" id="bidang_perusahaan" name="bidang_perusahaan" class="form-control" required>
+        </div>
+
+        <div class="form-group">
             <label for="lokasi_perusahaan">Lokasi Perusahaan</label>
             <input type="text" id="lokasi_perusahaan" name="lokasi_perusahaan" class="form-control" required>
         </div>

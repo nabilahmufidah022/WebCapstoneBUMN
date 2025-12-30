@@ -105,52 +105,71 @@
     <div class="card border-0 shadow-sm rounded-4 h-100">
         <div class="card-body p-4">
 
-            <!-- TITLE -->
-            <h5 class="fw-bold mb-4">Status Pendaftaran Mitra</h5>
+            @if($mitra)
+                <!-- TITLE -->
+                <h5 class="fw-bold mb-4">Status Pendaftaran Mitra</h5>
 
-            <!-- GRID INFO -->
-            <div class="row g-4">
+                <!-- GRID INFO -->
+                <div class="row g-4">
 
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1">Nama PIC</p>
-                    <p class="fw-semibold mb-0">{{ $mitra->nama_lengkap }}</p>
+                    <div class="col-md-6">
+                        <p class="text-muted small mb-1">Nama PIC</p>
+                        <p class="fw-semibold mb-0">{{ $mitra->nama_lengkap }}</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p class="text-muted small mb-1">Nama Perusahaan</p>
+                        <p class="fw-semibold mb-0">{{ $mitra->nama_perusahaan }}</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p class="text-muted small mb-1">Lokasi Perusahaan</p>
+                        <p class="fw-semibold mb-0">{{ $mitra->lokasi_perusahaan }}</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p class="text-muted small mb-1">Status Pendaftaran</p>
+                        
+                        @if($mitra->status == 0)
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                Menunggu Verifikasi
+                            </span>
+                        @elseif($mitra->status == 1)
+                            <span class="badge bg-success px-3 py-2 rounded-pill">
+                                Disetujui
+                            </span> 
+                        @else
+                            <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                Ditolak
+                            </span>
+                        @endif
+                    </div>
+
                 </div>
 
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1">Nama Perusahaan</p>
-                    <p class="fw-semibold mb-0">{{ $mitra->nama_perusahaan }}</p>
+                @if($mitra->deskripsi_perusahaan)
+                    <hr class="my-4">
+                    <p class="text-muted mb-0">
+                        {{ $mitra->deskripsi_perusahaan }}
+                    </p>
+                @endif
+            @else
+                <!-- TITLE -->
+                <h5 class="fw-bold mb-4">Status Pendaftaran Mitra</h5>
+                
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-building-add text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="fw-bold">Belum Terdaftar sebagai Mitra</h6>
+                    <p class="text-muted mb-4">
+                        Anda belum mendaftarkan perusahaan anda sebagai mitra BUMN. 
+                        Silahkan lengkapi data pendaftaran untuk mulai berkolaborasi.
+                    </p>
+                    <a href="{{ route('daftar_mitra') }}" class="btn btn-primary px-4 py-2 rounded-pill">
+                        Daftar Sebagai Mitra
+                    </a>
                 </div>
-
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1">Lokasi Perusahaan</p>
-                    <p class="fw-semibold mb-0">{{ $mitra->lokasi_perusahaan }}</p>
-                </div>
-
-                <div class="col-md-6">
-                    <p class="text-muted small mb-1">Status Pendaftaran</p>
-
-                    @if($mitra->status == 0)
-                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
-                            Menunggu Verifikasi
-                        </span>
-                    @elseif($mitra->status == 1)
-                        <span class="badge bg-success px-3 py-2 rounded-pill">
-                            Disetujui
-                        </span>
-                    @else
-                        <span class="badge bg-danger px-3 py-2 rounded-pill">
-                            Ditolak
-                        </span>
-                    @endif
-                </div>
-
-            </div>
-
-            @if($mitra->deskripsi_perusahaan)
-                <hr class="my-4">
-                <p class="text-muted mb-0">
-                    {{ $mitra->deskripsi_perusahaan }}
-                </p>
             @endif
 
         </div>

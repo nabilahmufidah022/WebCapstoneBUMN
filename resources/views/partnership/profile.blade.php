@@ -48,12 +48,28 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>  
-                        <button class="btn btn-primary" type="submit">Update Profile</button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Update Profile</button>
+                            <button class="btn btn-danger" type="button" onclick="confirmDeleteAccount()">Hapus Akun</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </form>
+    
+    <form id="delete-account-form" action="{{ route('profile.destroy') }}" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <script>
+        function confirmDeleteAccount() {
+            if (confirm('Yakin anda ingin menghapus akun?')) {
+                document.getElementById('delete-account-form').submit();
+            }
+        }
+    </script>
 </div>
 
 @endsection

@@ -205,4 +205,37 @@ class UserController extends Controller
 
         return response()->json(['success' => true, 'message' => $message, 'is_active' => $user->is_active]);
     }
+
+    public function destroyPermanently($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Delete related mitra data if exists to prevent foreign key issues 
+        // (Assuming ON DELETE CASCADE is not set in DB, if it is, this is just extra safety)
+        if ($user->mitra) {
+            $user->mitra()->delete();
+        }
+        
+        $user->delete();
+
+        return response()->json(['success' => true, 'message' => 'Account deleted permanently.']);
+    }
+
+    public function destroySelf(Request $request) {
+        $user = Auth::user();
+
+        // Delete related mitra data
+        if ($user->mitra) {
+            $user->mitra()->delete();
+        }
+
+        Auth::logout();
+        
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'Your account has been deleted permanently.');
+    }
 }
