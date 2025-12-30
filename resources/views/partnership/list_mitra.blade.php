@@ -4,16 +4,16 @@
 
 <div class="container py-4">
 
-    @if(session('success')) 
-    <div class="alert alert-success alert-dismissible fade show" role="alert"> 
-        {{ session('success') }} 
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div> 
-    @endif 
+    </div>
+    @endif
 
     {{-- ================= TAMPILAN KHUSUS ADMIN ================= --}}
     @if($user->usertype == 'admin')
-        <div class="d-flex justify-content-between align-items-center mb-4"> 
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold">Database Mitra Aktif</h4>
             <div>
                 {{-- Tombol Export memicu Modal Preview --}}
@@ -31,7 +31,7 @@
                         <label class="form-label small fw-bold">Pencarian</label>
                         <input type="text" name="search" class="form-control uniform-input" placeholder="Cari nama atau email..." value="{{ request('search') }}">
                     </div>
-        
+
                     <div class="col-md-3">
                         <label class="form-label small fw-bold">Tahun</label>
                         <select name="tahun" class="form-select uniform-input">
@@ -98,12 +98,12 @@
 
     {{-- ================= TAMPILAN KHUSUS USER ================= --}}
     @else
-        <div class="d-flex justify-content-between align-items-center mb-4"> 
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold">Status Pendaftaran Mitra Anda</h4>
             @if(!$hasMitra)
                 <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#daftarMitraModal">
                     <i class="bx bx-plus"></i> Daftar Mitra Baru
-                </button> 
+                </button>
             @endif
         </div>
 
@@ -207,7 +207,7 @@
 
                     {{-- UPDATE: Name sudah disesuaikan dengan database "bidang_perusahaan" --}}
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Bidang Mitra</label>
+                        <label class="form-label fw-bold small">Bidang Perusahaan</label>
                         <input type="text" name="bidang_perusahaan" class="form-control" placeholder="Contoh: Teknologi, Pendidikan, Kuliner, dll." required>
                     </div>
                     {{-- ==================================================== --}}
@@ -256,16 +256,16 @@
 
             // Hapus kolom 'Aksi' di header preview
             var headRow = targetHead.querySelector('tr');
-            if(headRow && headRow.lastElementChild) headRow.lastElementChild.remove(); 
+            if(headRow && headRow.lastElementChild) headRow.lastElementChild.remove();
 
             // Hapus tombol 'Detail' di body preview
             var bodyRows = targetBody.querySelectorAll('tr');
             bodyRows.forEach(function(row) {
-                if(row.lastElementChild) row.lastElementChild.remove(); 
+                if(row.lastElementChild) row.lastElementChild.remove();
             });
 
             // Update Link Download dengan filter
-            var currentParams = window.location.search; 
+            var currentParams = window.location.search;
             var baseUrl = "{{ route('list_mitra.export') }}";
             document.getElementById('btnRealDownload').href = baseUrl + currentParams;
 
