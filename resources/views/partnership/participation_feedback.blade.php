@@ -19,14 +19,14 @@
                 $userHasSubmitted = $participation->feedbacks->contains('user_id', auth()->id());
                 $isAdmin = auth()->user()->usertype === 'admin';
                 $section = request('section', 'all');
-                
+
                 // Mode logic
                 $isViewMode = ($section === 'all'); // Blue Button
                 $isInputMode = ($section !== 'all'); // Green Button
-                
+
                 // Show form if in Input Mode AND not submitted yet (for User)
-                $showForm = $isInputMode && !$userHasSubmitted; 
-                
+                $showForm = $isInputMode && !$userHasSubmitted;
+
                 // Logic for Admin Form: Show if Admin AND Input Mode
                 $showAdminForm = $isAdmin && $isInputMode;
 
@@ -114,16 +114,16 @@
                 </div>
             </form>
             @endif
-            
+
             {{-- FEEDBACK LIST (Only in View Mode) --}}
             @if($isViewMode)
             @php
-                // No filtering by user_id here. 
+                // No filtering by user_id here.
                 // We want Mitra to see Admin's feedback, and Admin to see Mitra's feedback.
-                // Since the participation is already scoped to the Mitra (in Controller), 
+                // Since the participation is already scoped to the Mitra (in Controller),
                 // all feedbacks attached to this participation are relevant.
             @endphp
-            
+
             @if(auth()->check())
             {{-- Existing feedbacks and replies --}}
             <div class="mt-4">
