@@ -27,8 +27,7 @@
                 // Show form if in Input Mode AND not submitted yet (for User)
                 $showForm = $isInputMode && !$userHasSubmitted; 
                 
-                // Logic for Admin Form: Show if Admin AND Input Mode
-                $showAdminForm = $isAdmin && $isInputMode;
+
 
                 $displayFeedbacks = $participation->feedbacks;
 
@@ -41,30 +40,10 @@
                 <div class="alert alert-success mb-3">{{ session('success') }}</div>
             @endif
 
-            {{-- ADMIN FEEDBACK FORM (Visible only in Input Mode for Admin) --}}
-            @if($showAdminForm)
-            <div class="card border-primary shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Kirim Feedback / Pesan untuk Mitra</h6>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('mitra.participation.feedback.reply', $participation->id) }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <textarea name="message" class="form-control" rows="4" placeholder="Tulis evaluasi, pesan, atau feedback untuk mitra di sini..." required></textarea>
-                        </div>
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-send me-2"></i>Kirim Feedback
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            @endif
 
-            {{-- USER FEEDBACK FORM (Visible only in Input Mode for Mitra) --}}
-            @if(auth()->check() && $showForm && !$isAdmin)
+
+            {{-- FEEDBACK FORM (Visible in Input Mode if not submitted yet) --}}
+            @if(auth()->check() && $showForm)
             <form method="POST" action="{{ route('mitra.participation.feedback.store', $participation->id) }}">
                 @csrf
                 <div class="mb-3">
