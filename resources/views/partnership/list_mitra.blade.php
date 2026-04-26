@@ -14,11 +14,11 @@
     {{-- ================= TAMPILAN KHUSUS ADMIN ================= --}}
     @if($user->usertype == 'admin')
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-bold">Database Mitra Aktif</h4>
+            <h4 class="fw-bold">Pusat Data Mitra</h4>
             <div>
                 {{-- Tombol Export memicu Modal Preview --}}
                 <button type="button" class="btn btn-primary" onclick="openPreviewModal()">
-                    <i class="bx bx-export"></i> Export CSV
+                    <i class="bx bx-export"></i> Export Laporan
                 </button>
             </div>
         </div>
@@ -82,6 +82,13 @@
                                     <i class="bx bx-show"></i> Detail
                                 </a>
                             </td>
+                            <td>
+                                <button type="button" 
+                                class="btn btn-primary btn-sm rounded-pill" 
+                                onclick="pilihMitra('{{ $item->id }}', '{{ $item->nama_perusahaan }}', '{{ $item->bidang_usaha }}')"
+                                data-bs-dismiss="modal">        Pilih Mitra
+                            </button>
+                        </td>
                         </tr>
                         @empty
                         <tr>

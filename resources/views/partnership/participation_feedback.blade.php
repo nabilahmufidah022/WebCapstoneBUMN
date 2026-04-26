@@ -6,7 +6,14 @@
         <div>
             <h4 class="fw-bold mb-1">Feedback Keikutsertaan Mitra</h4>
             <p class="text-muted mb-0">Berikan atau lihat feedback untuk pelatihan mitra.</p>
-        </div>
+        </div>PS C:\Users\ACER PC\Documents\SEM 7\Capstone\websiterumahbumn\WebCapstoneBUMN> npm run devpm run dev
+
+> dev
+> vite
+
+'vite' is not recognized as an internal or external command,
+operable program or batch file.
+PS C:\Users\ACER PC\Documents\SEM 7\Capstone\websiterumahbumn\WebCapstoneBUMN>
     </div>
 
     <div class="card shadow-sm border-0 rounded-4 p-4">

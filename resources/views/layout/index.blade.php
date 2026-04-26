@@ -41,7 +41,7 @@
       </div>
     </nav>
 
-    <<nav class="sidebar">
+    <nav class="sidebar">
       <div class="menu_content">
         <ul class="menu_items">
           <li class="item">
@@ -49,7 +49,7 @@
               <span class="navlink_icon">
                 <i class="bx bx-home-alt"></i>
               </span>
-              <span class="navlink">Dashboard Laporan</span>
+              <span class="navlink">Dashboard Monitoring</span>
             </a>
           </li>
 
@@ -62,15 +62,35 @@
               <i class="bx bx-chevron-right arrow-left"></i>
             </div>
 
-            <ul class="menu_items submenu">
-              <li><a href="{{ route('list_mitra') }}" class="nav_link sublink">Daftar Mitra</a></li>
-              
-              @if(Auth::user()->usertype === 'admin')
-              <li><a href="{{ route('kelola_pendaftaran') }}" class="nav_link sublink">Kelola Pendaftaran</a></li>
-              @endif
+            <<ul class="menu_items submenu">
+    {{-- 1. Silabus Pelatihan (Dapat diakses Admin & Mitra) --}}
+    <li>
+        <a href="{{ route('mitra.participation.index', ['status' => 'Akan Datang']) }}" class="nav_link sublink">
+            Silabus Pelatihan
+        </a>
+    </li>
 
-              <li><a href="{{ route('mitra.participation.index') }}" class="nav_link sublink">Keikutsertaan Mitra</a></li>
-            </ul>
+    {{-- 2. Daftar Mitra / Pusat Data --}}
+    <li>
+        <a href="{{ route('list_mitra') }}" class="nav_link sublink">Pusat Data Mitra</a>
+    </li>
+    
+    {{-- 3. Kelola Pendaftaran (Hanya Admin) --}}
+    @if(Auth::user()->usertype === 'admin')
+    <li>
+        <a href="{{ route('kelola_pendaftaran') }}" class="nav_link sublink">Verifikasi Pendaftaran</a>
+    </li>
+    @endif
+
+    {{-- 4. Histori Kerja Sama (Hanya untuk Mitra) --}}
+    @if(Auth::user()->usertype === 'mitra')
+    <li>
+        <a href="{{ route('mitra.participation.index', ['status' => 'Selesai']) }}" class="nav_link sublink">
+            Histori Kerja Sama
+        </a>
+    </li>
+    @endif
+</ul>
           </li>
 
           @if(Auth::user()->usertype === 'admin')
@@ -97,7 +117,7 @@
         </div>
       </div>
     </nav>
-    
+
     <main class="main">
         @yield('content')
     </main>

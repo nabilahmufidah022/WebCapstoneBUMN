@@ -12,17 +12,21 @@ class Mitra extends Model
     protected $table = 'mitra'; // Pastikan nama tabel di database 'mitra' atau 'mitras'
 
     protected $fillable = [
-        'user_id',
-        'nama_lengkap',
-        'no_telepon',
-        'nama_perusahaan',
-        'bidang_perusahaan', // <--- WAJIB DITAMBAHKAN DI SINI
-        'lokasi_perusahaan',
-        'deskripsi_perusahaan',
-        'company_profile',
-        'surat_permohonan_audiensi',
-        'status',
-    ];
+    'user_id',
+    'nama_lengkap',
+    'no_telepon',
+    'nama_perusahaan',
+    'bidang_perusahaan',
+    'lokasi_perusahaan',
+    'deskripsi_perusahaan',
+    'company_profile',
+    'surat_permohonan_audiensi',
+    'status',
+    // Tambahkan 3 kolom integrasi di bawah ini:
+    'average_rating',    // Untuk menyimpan reputasi (UC 011)
+    'status_aktif',      // Untuk status keaktifan otomatis (UC 009)
+    'alasan_penolakan',  // Untuk catatan jika pendaftaran ditolak (UC 006)
+];
 
     public function user()
     {
