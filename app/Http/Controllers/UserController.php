@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -53,31 +54,96 @@ class UserController extends Controller
         if ($user->usertype === 'admin') {
             // Admin dashboard data
             $totalMitra = \App\Models\Mitra::count();
-            $pendingMitra = \App\Models\Mitra::where('status', 'pending')->count();
-            $approvedMitra = \App\Models\Mitra::where('status', 'approved')->count();
             $totalParticipations = \App\Models\MitraEventParticipation::count();
-            $recentParticipations = \App\Models\MitraEventParticipation::with('mitra')->latest()->take(5)->get();
+
+            $mitraPieData = [
+                'labels' => ['Total Mitra Terdaftar'],
+                'data' => [$totalMitra]
+            ];
+
+            $agendaTrend = \App\Models\MitraEventParticipation::select(
+                    DB::raw('MONTHNAME(tanggal_pelatihan) as month'),
+                    DB::raw('count(*) as total')
+                )
+                ->groupBy('month')
+                ->orderBy('tanggal_pelatihan', 'asc')
+                ->get();
+
+            $recentParticipations = \App\Models\MitraEventParticipation::with('mitra')
+                ->latest()
+                ->take(5)
+                ->get();
 
             return view('partnership.dashboard', compact(
                 'user',
                 'totalMitra',
-                'pendingMitra',
-                'approvedMitra',
                 'totalParticipations',
+                'mitraPieData',
+                'agendaTrend',
                 'recentParticipations'
             ));
         } else {
-            // User dashboard data
-            $mitra = $user->mitra; // Assuming relationship exists
-            $participations = $mitra ? $mitra->mitraEventParticipations()->latest()->take(5)->get() : collect();
+            // ==========================================
+            // DASHBOARD MITRA
+            // ==========================================
+            $mitra = $user->mitra;
+            $data = [
+                'total_kerjasama' => 0,
+                'agenda_mendatang' => 0,
+                'perlu_evaluasi' => 0
+            ];
 
-            return view('partnership.dashboard', compact('user', 'mitra', 'participations'));
+            if ($mitra) {
+                // 1. Ambil Histori Kerjasama Terbaru (Limit 5)
+                $participations = $mitra->mitraEventParticipations()->latest()->take(5)->get();
+
+                // 2. Hitung Statistik untuk Widget Dashboard Mitra
+                $data['total_kerjasama'] = $mitra->mitraEventParticipations()->count();
+
+                $data['agenda_mendatang'] = $mitra->mitraEventParticipations()
+                    ->where('status', 'Akan Datang')
+                    ->count();
+
+                // SINKRONISASI: Cek kolom rating_mitra agar widget "Perlu Evaluasi" berkurang setelah feedback dikirim
+                $data['perlu_evaluasi'] = $mitra->mitraEventParticipations()
+                    ->where('status', 'Selesai')
+                    ->whereNull('rating_mitra')
+                    ->count();
+            } else {
+                $participations = collect();
+            }
+
+            return view('partnership.dashboard', compact('user', 'mitra', 'participations', 'data'));
         }
     }
 
-    public function profile(){
-        $user = Auth::user();
-        return view('partnership.profile', compact('user'));
+    /**
+     * INTEGRASI FITUR: Halaman Profil Pengguna
+     * Memuat data relasi profil bisnis mitra secara realtime.
+     */
+    public function profile(Request $request){
+        // Menangkap objek user yang sedang melakukan session login saat ini
+        $currentUser = Auth::user();
+
+        // JALUR ADMIN BYPASS: Jika peran login adalah admin dan terdapat parameter user_id target pada URL
+        if ($currentUser->usertype === 'admin' && $request->filled('user_id')) {
+
+            // Ambil data rekam medis user target yang akunnya ingin dimutasi atau dibypass oleh admin
+            $user = User::findOrFail($request->user_id);
+            $mitra = $user->mitra;
+
+        } else {
+
+            // JALUR MANDIRI: Jika diakses secara personal oleh user/mitra itu sendiri dari menu profile asli
+            $user = $currentUser;
+            $mitra = null;
+            if ($user->usertype === 'user' || $user->usertype === 'mitra') {
+                $mitra = $user->mitra;
+            }
+
+        }
+
+        return view('partnership.profile', compact('user', 'mitra'));
     }
 
     public function settings(){
@@ -85,6 +151,11 @@ class UserController extends Controller
         return view('partnership.settings', compact('user'));
     }
 
+    /**
+     * SINKRONISASI ANTAR SERVER & INTEGRASI FITUR: HANDOVER PIC AUTOMATION (DUAL-CHANNEL)
+     * Jalur A (Mandiri Mitra): Mendeteksi pembaruan profil / transisi PIC biasa secara seamless.
+     * Jalur B (Admin Bypass): Mengizinkan intervensi paksa Admin jika PIC lama hilang kabar (ghosting).
+     */
     public function updateProfile(Request $request){
         $user = Auth::user();
         $request->validate([
@@ -92,6 +163,10 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // Tangkap nama dan email lama sebelum disimpan untuk keperluan audit log handover
+        $namaLama = $user->name;
+        $emailLama = $user->email;
 
         $data = [
             'name' => $request->name,
@@ -104,9 +179,46 @@ class UserController extends Controller
             $data['profile_image'] = $imageName;
         }
 
+        // Lakukan pembaruan data dasar user account
         $user->update($data);
 
-        return redirect()->route('profile')->with('success', 'Profile updated successfully.');
+        // [JALUR B] DETEKSI INTERVENSI/EDIT BYPASS ADMIN: Jika yang login Admin dan entitas mitra terikat ada
+        if ($user->usertype === 'admin' && $user->mitra) {
+            $user->mitra->update([
+                'nama_perusahaan' => $request->nama_perusahaan,
+                'bidang_perusahaan' => $request->bidang_perusahaan,
+                'nama_lengkap' => $request->nama_lengkap,
+                'no_telepon' => $request->no_telepon,
+                'deskripsi_perusahaan' => $request->deskripsi_perusahaan,
+                'lokasi_perusahaan' => $request->lokasi_perusahaan,
+            ]);
+
+            // SOLUSI: Menggunakan model HistoryMitra yang sudah pasti ada strukturnya di database kamu
+            \App\Models\HistoryMitra::create([
+                'mitra_id' => $user->mitra->id,
+                'action' => 'reviewed',
+                'description' => "INTERVENSI ADMIN: Pemulihan data kemitraan dan mutasi paksa PIC berhasil diselesaikan oleh Otoritas Admin Rumah BUMN Jakarta.",
+                'user_id' => Auth::id()
+            ]);
+        }
+        // [JALUR A] JALUR MANDIRI SEAMLESS: Jika nama berubah dan dijalankan oleh entitas mitra biasa
+        else if ($namaLama !== $request->name && $user->mitra) {
+
+            // Perbarui kolom penanggung jawab / nama lengkap di tabel mitra agar sinkron otomatis
+            $user->mitra->update([
+                'nama_lengkap' => $request->name
+            ]);
+
+            // SOLUSI: Menggunakan model HistoryMitra untuk mencatat log mutasi pergantian antar PIC secara mandiri
+            \App\Models\HistoryMitra::create([
+                'mitra_id' => $user->mitra->id,
+                'action' => 'reviewed',
+                'description' => "NOTIFIKASI HANDOVER: Pergantian PIC dilakukan secara mandiri dari " . $namaLama . " (" . $emailLama . ") menjadi " . $request->name . " (" . $request->email . ").",
+                'user_id' => Auth::id()
+            ]);
+        }
+
+        return redirect()->route('profile')->with('success', 'Profile and Handover PIC data synchronized successfully.');
     }
 
     public function changePassword(Request $request){
@@ -151,7 +263,7 @@ class UserController extends Controller
             'usertype' => 'required|in:user,admin',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -196,8 +308,6 @@ class UserController extends Controller
     public function deleteAccount($id)
     {
         $user = User::findOrFail($id);
-
-        // Toggle active state instead of deleting
         $user->is_active = !$user->is_active;
         $user->save();
 
@@ -209,13 +319,11 @@ class UserController extends Controller
     public function destroyPermanently($id)
     {
         $user = User::findOrFail($id);
-        
-        // Delete related mitra data if exists to prevent foreign key issues 
-        // (Assuming ON DELETE CASCADE is not set in DB, if it is, this is just extra safety)
+
         if ($user->mitra) {
             $user->mitra()->delete();
         }
-        
+
         $user->delete();
 
         return response()->json(['success' => true, 'message' => 'Account deleted permanently.']);
@@ -224,13 +332,12 @@ class UserController extends Controller
     public function destroySelf(Request $request) {
         $user = Auth::user();
 
-        // Delete related mitra data
         if ($user->mitra) {
             $user->mitra()->delete();
         }
 
         Auth::logout();
-        
+
         $user->delete();
 
         $request->session()->invalidate();

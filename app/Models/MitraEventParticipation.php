@@ -18,15 +18,18 @@ class MitraEventParticipation extends Model
         'waktu_pelatihan',
         'tempat_pelatihan',
         'narasumber',
-        'status',          // Akan berisi: 'Akan Datang' (Silabus) atau 'Selesai' (Histori)
-        'pelaksanaan',     // Untuk Online / Offline
-        'kategori',        // Literasi Digital, Bisnis, dll
-        'rating',          // Nilai dari Admin (1-5)
-        'catatan_internal' // Catatan evaluasi rahasia untuk Admin
+        'status',           // Berisi: 'Akan Datang' (Silabus) atau 'Selesai' (Histori)
+        'pelaksanaan',      // Online / Offline
+        'kategori',         // Literasi Digital, Bisnis, Dasar, Tematik
+        'rating',           // Nilai dari Admin (1-5) untuk monitoring internal
+        'catatan_internal', // Evaluasi internal Admin
+        'rating_mitra',     // Tambahkan ini: Rating kepuasan dari sisi Mitra
+        'feedback_mitra'    // Tambahkan ini: Saran/Masukan dari sisi Mitra
     ];
 
     /**
      * Relasi ke Pusat Data Mitra
+     * Menghubungkan partisipasi dengan profil perusahaan mitra
      */
     public function mitra()
     {
@@ -34,7 +37,7 @@ class MitraEventParticipation extends Model
     }
 
     /**
-     * Relasi ke Feedback dari Mitra
+     * Relasi ke Feedback (Jika kamu menggunakan tabel feedback terpisah)
      */
     public function feedbacks()
     {
@@ -42,7 +45,7 @@ class MitraEventParticipation extends Model
     }
 
     /**
-     * Helper untuk cek apakah sudah selesai (Opsional, mempermudah di Blade)
+     * Helper untuk cek status di Blade
      */
     public function isFinished()
     {

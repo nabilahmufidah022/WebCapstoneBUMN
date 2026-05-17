@@ -9,38 +9,55 @@ class Mitra extends Model
 {
     use HasFactory;
 
-    protected $table = 'mitra'; // Pastikan nama tabel di database 'mitra' atau 'mitras'
+    protected $table = 'mitra';
 
+    /**
+     * Atribut yang dapat diisi (Mass Assignable)
+     */
     protected $fillable = [
-    'user_id',
-    'nama_lengkap',
-    'no_telepon',
-    'nama_perusahaan',
-    'bidang_perusahaan',
-    'lokasi_perusahaan',
-    'deskripsi_perusahaan',
-    'company_profile',
-    'surat_permohonan_audiensi',
-    'status',
-    // Tambahkan 3 kolom integrasi di bawah ini:
-    'average_rating',    // Untuk menyimpan reputasi (UC 011)
-    'status_aktif',      // Untuk status keaktifan otomatis (UC 009)
-    'alasan_penolakan',  // Untuk catatan jika pendaftaran ditolak (UC 006)
-];
+        'user_id',
+        'nama_lengkap',
+        'no_telepon',
+        'nama_perusahaan',
+        'bidang_perusahaan',
+        'lokasi_perusahaan',
+        'deskripsi_perusahaan',
+        'company_profile',
+        'surat_permohonan_audiensi',
+        'status',
+        // Kolom Integrasi untuk Skripsi / Sistem Informasi
+        'average_rating',    // Menyimpan reputasi berdasarkan rating pelatihan
+        'status_aktif',      // Status otomatis: Aktif / Non-Aktif
+        'alasan_penolakan',  // Catatan jika pendaftaran ditolak
+    ];
 
+    /**
+     * Relasi ke User (Account Mitra)
+     * Menghubungkan identitas mitra dengan akun login sistem.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Relasi ke Partisipasi Kegiatan / Silabus (Alias Pendek)
+     * Nama fungsi 'participations' untuk kemudahan pemanggilan data.
+     */
+    public function participations()
+    {
+        // Pastikan nama model target adalah MitraEventParticipation
+        return $this->hasMany(MitraEventParticipation::class, 'mitra_id');
+    }
+
+    /**
+     * Relasi Utama ke Partisipasi Kegiatan (Silabus Pelatihan)
+     * Digunakan oleh Controller untuk menghitung Total Keterlibatan secara Realtime.
+     * Fitur ini menghubungkan ID Mitra dengan kolom mitra_id di tabel partisipasi.
+     */
     public function mitraEventParticipations()
     {
-        return $this->hasMany(MitraEventParticipation::class);
+        // Ini adalah kunci utama untuk integrasi data realtime di halaman Pusat Data Mitra
+        return $this->hasMany(MitraEventParticipation::class, 'mitra_id', 'id');
     }
-
-    public function mitra()
-    {
-        return $this->belongsTo(Mitra::class, 'mitra_id');
-    }
-
 }

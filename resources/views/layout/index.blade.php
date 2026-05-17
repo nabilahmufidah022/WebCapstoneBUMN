@@ -44,6 +44,8 @@
     <nav class="sidebar">
       <div class="menu_content">
         <ul class="menu_items">
+
+          {{-- DASHBOARD (Akses Semua User) --}}
           <li class="item">
             <a href="{{ route('dashboard') }}" class="nav_link">
               <span class="navlink_icon">
@@ -53,6 +55,8 @@
             </a>
           </li>
 
+          {{-- MENU PARTNERSHIP (HANYA UNTUK ADMIN) --}}
+          @if(Auth::user()->usertype === 'admin')
           <li class="item">
             <div class="nav_link submenu_item">
               <span class="navlink_icon">
@@ -62,37 +66,23 @@
               <i class="bx bx-chevron-right arrow-left"></i>
             </div>
 
-            <<ul class="menu_items submenu">
-    {{-- 1. Silabus Pelatihan (Dapat diakses Admin & Mitra) --}}
-    <li>
-        <a href="{{ route('mitra.participation.index', ['status' => 'Akan Datang']) }}" class="nav_link sublink">
-            Silabus Pelatihan
-        </a>
-    </li>
-
-    {{-- 2. Daftar Mitra / Pusat Data --}}
-    <li>
-        <a href="{{ route('list_mitra') }}" class="nav_link sublink">Pusat Data Mitra</a>
-    </li>
-    
-    {{-- 3. Kelola Pendaftaran (Hanya Admin) --}}
-    @if(Auth::user()->usertype === 'admin')
-    <li>
-        <a href="{{ route('kelola_pendaftaran') }}" class="nav_link sublink">Verifikasi Pendaftaran</a>
-    </li>
-    @endif
-
-    {{-- 4. Histori Kerja Sama (Hanya untuk Mitra) --}}
-    @if(Auth::user()->usertype === 'mitra')
-    <li>
-        <a href="{{ route('mitra.participation.index', ['status' => 'Selesai']) }}" class="nav_link sublink">
-            Histori Kerja Sama
-        </a>
-    </li>
-    @endif
-</ul>
+            <ul class="menu_items submenu">
+                <li>
+                    <a href="{{ route('mitra.participation.index') }}" class="nav_link sublink">
+                        Silabus Pelatihan
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('list_mitra') }}" class="nav_link sublink">Pusat Data Mitra</a>
+                </li>
+                <li>
+                    <a href="{{ route('kelola_pendaftaran') }}" class="nav_link sublink">Verifikasi Pendaftaran</a>
+                </li>
+            </ul>
           </li>
+          @endif
 
+          {{-- MENU ACCOUNT MANAGEMENT (Hanya Admin) --}}
           @if(Auth::user()->usertype === 'admin')
           <li class="item">
             <a href="{{ route('account') }}" class="nav_link">
@@ -103,6 +93,19 @@
             </a>
           </li>
           @endif
+
+          {{-- MENU PENGELOLAAN PROFIL (Hanya Mitra) --}}
+          @if(Auth::user()->usertype === 'mitra')
+          <li class="item">
+            <a href="{{ route('profile') }}" class="nav_link">
+              <span class="navlink_icon">
+                <i class="bx bxs-user-rectangle"></i>
+              </span>
+              <span class="navlink">Pengelolaan Profil</span>
+            </a>
+          </li>
+          @endif
+
         </ul>
 
         <div class="bottom_content">
