@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', [UserController::class, 'goDashboard'])->name('dashboard');
     Route::get('profile', [UserController::class, 'profile'])->name('profile');
     Route::post('profile', [UserController::class, 'updateProfile'])->name('updateProfile');
+    Route::post('profile/handover', [UserController::class, 'handoverPIC'])->name('profile.handover'); // ROUTE BARU HANDOVER PIC VIA MODAL
     Route::delete('profile', [UserController::class, 'destroySelf'])->name('profile.destroy');
     Route::get('settings', [UserController::class, 'settings'])->name('settings');
     Route::post('change-password', [UserController::class, 'changePassword'])->name('changePassword');
@@ -56,6 +57,7 @@ Route::middleware('auth')->group(function () {
     // Silabus & Participation Feature Routes
     Route::prefix('mitra/participation')->group(function () {
         // 1. Statis
+        //
         Route::get('/', [MitraParticipationController::class, 'index'])->name('mitra.participation.index');
         Route::post('/', [MitraParticipationController::class, 'store'])->name('mitra.participation.store');
         Route::get('/export', [MitraParticipationController::class, 'export'])->name('mitra.participation.export');

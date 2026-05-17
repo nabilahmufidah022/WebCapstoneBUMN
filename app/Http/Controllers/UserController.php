@@ -128,7 +128,7 @@ class UserController extends Controller
         // JALUR ADMIN BYPASS: Jika peran login adalah admin dan terdapat parameter user_id target pada URL
         if ($currentUser->usertype === 'admin' && $request->filled('user_id')) {
 
-            // Ambil data rekam medis user target yang akunnya ingin dimutasi atau dibypass oleh admin
+            // Ambil data user target yang akunnya ingin dimutasi atau dibypass oleh admin
             $user = User::findOrFail($request->user_id);
             $mitra = $user->mitra;
 
@@ -154,7 +154,6 @@ class UserController extends Controller
     /**
      * SINKRONISASI ANTAR SERVER & INTEGRASI FITUR: HANDOVER PIC AUTOMATION (DUAL-CHANNEL)
      * Jalur A (Mandiri Mitra): Mendeteksi pembaruan profil / transisi PIC biasa secara seamless.
-     * Jalur B (Admin Bypass): Mengizinkan intervensi paksa Admin jika PIC lama hilang kabar (ghosting).
      */
     public function updateProfile(Request $request){
         $user = Auth::user();
@@ -179,37 +178,18 @@ class UserController extends Controller
             $data['profile_image'] = $imageName;
         }
 
-        // Lakukan pembaruan data dasar user account
+        // Lakukan pembaruan data dasar user account (Berlaku untuk Admin maupun Mitra)
         $user->update($data);
 
-        // [JALUR B] DETEKSI INTERVENSI/EDIT BYPASS ADMIN: Jika yang login Admin dan entitas mitra terikat ada
-        if ($user->usertype === 'admin' && $user->mitra) {
-            $user->mitra->update([
-                'nama_perusahaan' => $request->nama_perusahaan,
-                'bidang_perusahaan' => $request->bidang_perusahaan,
-                'nama_lengkap' => $request->nama_lengkap,
-                'no_telepon' => $request->no_telepon,
-                'deskripsi_perusahaan' => $request->deskripsi_perusahaan,
-                'lokasi_perusahaan' => $request->lokasi_perusahaan,
-            ]);
-
-            // SOLUSI: Menggunakan model HistoryMitra yang sudah pasti ada strukturnya di database kamu
-            \App\Models\HistoryMitra::create([
-                'mitra_id' => $user->mitra->id,
-                'action' => 'reviewed',
-                'description' => "INTERVENSI ADMIN: Pemulihan data kemitraan dan mutasi paksa PIC berhasil diselesaikan oleh Otoritas Admin Rumah BUMN Jakarta.",
-                'user_id' => Auth::id()
-            ]);
-        }
-        // [JALUR A] JALUR MANDIRI SEAMLESS: Jika nama berubah dan dijalankan oleh entitas mitra biasa
-        else if ($namaLama !== $request->name && $user->mitra) {
+        // [JALUR A] JALUR MANDIRI SEAMLESS: Hanya berjalan untuk user/mitra biasa (Bukan Admin) jika namanya diubah
+        if ($user->usertype !== 'admin' && $namaLama !== $request->name && $user->mitra) {
 
             // Perbarui kolom penanggung jawab / nama lengkap di tabel mitra agar sinkron otomatis
             $user->mitra->update([
                 'nama_lengkap' => $request->name
             ]);
 
-            // SOLUSI: Menggunakan model HistoryMitra untuk mencatat log mutasi pergantian antar PIC secara mandiri
+            // Menggunakan model HistoryMitra untuk mencatat log mutasi pergantian antar PIC secara mandiri
             \App\Models\HistoryMitra::create([
                 'mitra_id' => $user->mitra->id,
                 'action' => 'reviewed',
@@ -218,7 +198,50 @@ class UserController extends Controller
             ]);
         }
 
-        return redirect()->route('profile')->with('success', 'Profile and Handover PIC data synchronized successfully.');
+        return redirect()->route('profile')->with('success', 'Profile data updated successfully.');
+    }
+
+    /**
+     * FITUR JALUR KHUSUS: HANDOVER PIC AUTOMATION VIA MODAL
+     * Memproses alih penanggung jawab akun mitra ke entitas baru secara resmi dan terstruktur.
+     */
+    public function handoverPIC(Request $request) {
+        $user = Auth::user();
+
+        // Validasi input khusus yang datang dari modal form handover (Nama, Email, dan No WA Baru)
+        $request->validate([
+            'new_pic_name'  => 'required|string|max:255',
+            'new_pic_email' => 'required|email|unique:users,email,' . $user->id,
+            'new_pic_phone' => 'required|string|max:20',
+        ]);
+
+        // Rekam data lama untuk keperluan catatan log riwayat (Audit Trail)
+        $namaLama = $user->name;
+        $emailLama = $user->email;
+
+        // 1. Eksekusi pembaruan data kredensial akun user yang aktif saat ini
+        $user->update([
+            'name'  => $request->new_pic_name,
+            'email' => $request->new_pic_email,
+        ]);
+
+        // 2. Jika akun terikat dengan data kemitraan Rumah BUMN, sinkronisasikan nama PIC utamanya beserta Nomor Teleponnya
+        if ($user->mitra) {
+            $user->mitra->update([
+                'nama_lengkap' => $request->new_pic_name,
+                'no_telepon'   => $request->new_pic_phone
+            ]);
+
+            // 3. Masukkan jejak rekam mutasi ke dalam tabel log HistoryMitra
+            \App\Models\HistoryMitra::create([
+                'mitra_id'    => $user->mitra->id,
+                'action'      => 'reviewed',
+                'description' => "NOTIFIKASI HANDOVER RESMI: Alih kepemilikan akses akun penanggung jawab sukses diselesaikan dari " . $namaLama . " (" . $emailLama . ") kepada PIC pengganti: " . $request->new_pic_name . " (" . $request->new_pic_email . ") dengan No. WA: " . $request->new_pic_phone . ".",
+                'user_id'     => Auth::id()
+            ]);
+        }
+
+        return redirect()->route('profile')->with('success', 'Proses Handover PIC berhasil dilakukan. Data akun penanggung jawab telah dimutasi.');
     }
 
     public function changePassword(Request $request){
