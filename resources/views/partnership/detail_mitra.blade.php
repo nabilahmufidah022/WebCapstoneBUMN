@@ -50,7 +50,7 @@
 
         <div class="card-body">
           <div class="row g-4">
-            
+
             <div class="col-md-6 info-item">
               <div class="icon bg-primary-soft">
                 <i class="bi bi-building"></i>
@@ -61,13 +61,28 @@
               </div>
             </div>
 
+            {{-- FITUR PENANGANAN REALTIME ARRAY TO BADGES (REVISI DOSEN) --}}
             <div class="col-md-6 info-item">
               <div class="icon bg-info-soft">
                 <i class="bi bi-tags"></i>
               </div>
               <div>
-                <small class="text-muted d-block">Bidang Perusahaan</small>
-                <div class="fw-semibold">{{ $mitra->bidang_perusahaan ?? '-' }}</div>
+                <small class="text-muted d-block">Bidang Perusahaan / Kategori</small>
+                <div class="fw-semibold mt-1">
+                  @if(is_array($mitra->bidang_perusahaan) && count($mitra->bidang_perusahaan) > 0)
+                    <div class="d-flex flex-wrap gap-1">
+                      @foreach($mitra->bidang_perusahaan as $bidang)
+                        <span class="badge bg-light text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill small fw-bold" style="font-size: 12px;">
+                          {{ $bidang }}
+                        </span>
+                      @endforeach
+                    </div>
+                  @else
+                    <span class="badge bg-light text-secondary px-2 py-1 rounded-pill small fw-bold" style="font-size: 12px;">
+                      {{ $mitra->bidang_perusahaan ?? '-' }}
+                    </span>
+                  @endif
+                </div>
               </div>
             </div>
 
@@ -197,7 +212,7 @@
 
     {{-- KANAN : STATUS & ACTION BOX --}}
     <div class="col-md-4">
-      
+
       <div class="card custom-card status-card mb-4">
         <div class="card-header custom-card-header text-center">
           <h6 class="mb-0 fw-semibold">Status Saat Ini</h6>

@@ -36,17 +36,19 @@
                     <input type="hidden" name="mode" value="{{ request('mode') }}">
 
                     <div class="col-md-3">
-                        <label class="form-label small fw-bold text-muted">Pencarian</label>
+                        <label class="group-label small fw-bold text-muted">Pencarian</label>
                         <input type="text" name="search" class="form-control form-control-sm shadow-none" placeholder="Nama perusahaan atau PIC..." value="{{ request('search') }}">
                     </div>
 
+                    {{-- FITUR REVISI DOSEN: SELECTION FILTER DROPDOWN KATEGORI PELATIHAN --}}
                     <div class="col-md-2">
                         <label class="form-label small fw-bold text-muted">Bidang Usaha</label>
                         <select name="bidang" class="form-select form-select-sm shadow-none">
                             <option value="">Semua Bidang</option>
-                            <option value="Ecommerce" {{ request('bidang') == 'Ecommerce' ? 'selected' : '' }}>Ecommerce</option>
-                            <option value="Teknologi" {{ request('bidang') == 'Teknologi' ? 'selected' : '' }}>Teknologi</option>
-                            <option value="Kuliner" {{ request('bidang') == 'Kuliner' ? 'selected' : '' }}>Kuliner</option>
+                            <option value="Literasi Digital" {{ request('bidang') == 'Literasi Digital' ? 'selected' : '' }}>Literasi Digital</option>
+                            <option value="Literasi Bisnis" {{ request('bidang') == 'Literasi Bisnis' ? 'selected' : '' }}>Literasi Bisnis</option>
+                            <option value="Literasi Dasar" {{ request('bidang') == 'Literasi Dasar' ? 'selected' : '' }}>Literasi Dasar</option>
+                            <option value="Tematik" {{ request('bidang') == 'Tematik' ? 'selected' : '' }}>Tematik</option>
                         </select>
                     </div>
 
@@ -108,7 +110,21 @@
                                 <div class="fw-bold text-primary">{{ $mitra->nama_perusahaan }}</div>
                                 <small class="text-muted"><i class="bx bx-user-circle"></i> {{ $mitra->nama_lengkap }}</small>
                             </td>
-                            <td><span class="badge bg-light text-dark border">{{ $mitra->bidang_perusahaan ?? '-' }}</span></td>
+
+                            {{-- FITUR REVISI DOSEN: RENDER MULTIPLE BADGES KATEGORI DI MAIN TABLE --}}
+                            <td>
+                                @if(is_array($mitra->bidang_perusahaan) && count($mitra->bidang_perusahaan) > 0)
+                                    <div class="d-flex flex-wrap gap-1" style="max-width: 220px;">
+                                        @foreach($mitra->bidang_perusahaan as $bidang)
+                                            <span class="badge bg-light text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill small fw-bold">
+                                                {{ $bidang }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
+                            </td>
 
                             <td class="text-center fw-bold text-dark">
                                 {{ $mitra->created_at->format('Y') }}
@@ -200,7 +216,7 @@
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
                                     <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm">
-                                        <i class="bx bxs-file-export me-1"></i> Cetak
+                                        <i class="bx bx-bxs-file-export me-1"></i> Cetak
                                     </button>
                                 </div>
                             </div>
@@ -226,7 +242,16 @@
                                     @foreach($mitras as $m)
                                     <tr>
                                         <td class="ps-4 fw-bold text-primary">{{ $m->nama_perusahaan }}</td>
-                                        <td>{{ $m->bidang_perusahaan }}</td>
+
+                                        {{-- SINKRONISASI MODAL PREVIEW AGAR MENDUKUNG ARRAY/KATEGORI MULTIPLE BADGES --}}
+                                        <td>
+                                            @if(is_array($m->bidang_perusahaan))
+                                                {{ implode(', ', $m->bidang_perusahaan) }}
+                                            @else
+                                                {{ $m->bidang_perusahaan ?? '-' }}
+                                            @endif
+                                        </td>
+
                                         <td>{{ $m->created_at->format('d/m/Y') }}</td>
                                         <td class="text-center">{{ $m->mitra_event_participations_count ?? 0 }} Sesi</td>
                                         <td>{{ $m->status_aktif }}</td>
@@ -259,10 +284,30 @@
                                 <label class="small fw-bold text-muted mb-1">NAMA PERUSAHAAN</label>
                                 <input type="text" name="nama_perusahaan" class="form-control rounded-3" placeholder="Contoh: PT. Maju Jaya" required>
                             </div>
+
+                            {{-- FITUR REVISI DOSEN: MULTISELECT CHECKBOX PADA MODAL ENTRI MANUAL ADMIN --}}
                             <div class="mb-3">
-                                <label class="small fw-bold text-muted mb-1">BIDANG USAHA</label>
-                                <input type="text" name="bidang_perusahaan" class="form-control rounded-3" placeholder="Contoh: Kuliner / Kerajinan" required>
+                                <label class="small fw-bold text-muted mb-2">BIDANG USAHA / KATEGORI PELATIHAN</label>
+                                <div class="p-3 bg-light rounded-3 border">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="bidang_perusahaan[]" value="Literasi Digital" id="add_digital">
+                                        <label class="form-check-label small fw-semibold" for="add_digital">Literasi Digital</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="bidang_perusahaan[]" value="Literasi Bisnis" id="add_bisnis">
+                                        <label class="form-check-label small fw-semibold" for="add_bisnis">Literasi Bisnis</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="bidang_perusahaan[]" value="Literasi Dasar" id="add_dasar">
+                                        <label class="form-check-label small fw-semibold" for="add_dasar">Literasi Dasar</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="bidang_perusahaan[]" value="Tematik" id="add_tematik">
+                                        <label class="form-check-label small fw-semibold" for="add_tematik">Tematik</label>
+                                    </div>
+                                </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="small fw-bold text-muted mb-1">NAMA PIC</label>

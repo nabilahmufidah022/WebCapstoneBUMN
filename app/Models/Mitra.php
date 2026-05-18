@@ -32,6 +32,15 @@ class Mitra extends Model
     ];
 
     /**
+     * FITUR REVISI DOSEN: ARRAYS TO JSON CASTING
+     * Memastikan kolom bidang_perusahaan dibaca secara otomatis sebagai array PHP
+     * untuk menampung multiselect lebih dari 1 Kategori Kemitraan secara aman.
+     */
+    protected $casts = [
+        'bidang_perusahaan' => 'array',
+    ];
+
+    /**
      * Relasi ke User (Account Mitra)
      * Menghubungkan identitas mitra dengan akun login sistem.
      */

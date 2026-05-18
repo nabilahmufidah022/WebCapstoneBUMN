@@ -44,9 +44,9 @@ class MitraController extends Controller
             });
         }
 
-        // Logic Filter Bidang Usaha
+        // FITUR REVISI DOSEN: LOGIC FILTER BERDASARKAN QUERY DATA JSON ARRAY
         if ($request->filled('bidang')) {
-            $query->where('bidang_perusahaan', $request->bidang);
+            $query->whereJsonContains('bidang_perusahaan', $request->bidang);
         }
 
         // Logic Filter Tahun Bergabung
@@ -172,9 +172,12 @@ class MitraController extends Controller
             ]);
 
             foreach ($mitras as $m) {
+                // SINKRONISASI CSV EXPORT: Konversi data array bidang_perusahaan menjadi string terpisah koma
+                $bidangString = is_array($m->bidang_perusahaan) ? implode(', ', $m->bidang_perusahaan) : $m->bidang_perusahaan;
+
                 fputcsv($file, [
                     $m->nama_perusahaan,
-                    $m->bidang_perusahaan,
+                    $bidangString,
                     $m->nama_lengkap,
                     $m->no_telepon,
                     $m->lokasi_perusahaan,
@@ -193,7 +196,7 @@ class MitraController extends Controller
 
     /**
      * Menambahkan Mitra Secara Manual oleh Admin
-     * FITUR 1: Perubahan Teks Tombol & FITUR 3: Status Awal Aktif
+     * FITUR REVISI DOSEN: Menerima masukan multi-checkbox kategori berupa array
      */
     public function storeManual(Request $request)
     {
@@ -205,7 +208,7 @@ class MitraController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'no_telepon' => 'required|string|max:20',
             'nama_perusahaan' => 'required|string|max:255',
-            'bidang_perusahaan' => 'required|string|max:255',
+            'bidang_perusahaan' => 'required|array', // Diubah menjadi array wajib
             'lokasi_perusahaan' => 'required|string|max:255',
         ]);
 
@@ -213,7 +216,7 @@ class MitraController extends Controller
             'nama_lengkap' => $request->nama_lengkap,
             'no_telepon' => $request->no_telepon,
             'nama_perusahaan' => $request->nama_perusahaan,
-            'bidang_perusahaan' => $request->bidang_perusahaan,
+            'bidang_perusahaan' => $request->bidang_perusahaan, // Otomatis dicast ke JSON oleh Model
             'lokasi_perusahaan' => $request->lokasi_perusahaan,
             'deskripsi_perusahaan' => $request->deskripsi_perusahaan ?? 'Input Manual oleh Admin',
             'status' => 2,
@@ -259,6 +262,7 @@ class MitraController extends Controller
 
     /**
      * Simpan Data Pendaftaran Mitra Baru (Status Awal Aktif)
+     * FITUR REVISI DOSEN: Mengubah validasi bidang_perusahaan agar mendukung input array checkbox
      */
     public function store(Request $request)
     {
@@ -266,7 +270,7 @@ class MitraController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'no_telepon' => 'required|string|max:20',
             'nama_perusahaan' => 'required|string|max:255',
-            'bidang_perusahaan' => 'required|string|max:255',
+            'bidang_perusahaan' => 'required|array', // Diubah menjadi array wajib
             'lokasi_perusahaan' => 'required|string|max:255',
             'deskripsi_perusahaan' => 'required|string',
             'company_profile' => 'nullable|file|mimes:pdf|max:5120',
@@ -276,7 +280,7 @@ class MitraController extends Controller
             'nama_lengkap',
             'no_telepon',
             'nama_perusahaan',
-            'bidang_perusahaan',
+            'bidang_perusahaan', // Array checkbox tersimpan aman
             'lokasi_perusahaan',
             'deskripsi_perusahaan'
         ]);
@@ -343,4 +347,4 @@ class MitraController extends Controller
         $histories = HistoryMitra::with('user')->where('mitra_id', $id)->orderBy('created_at', 'desc')->get();
         return view('partnership.detail_mitra', compact('mitra', 'histories'));
     }
-};
+}
