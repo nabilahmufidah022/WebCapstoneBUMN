@@ -33,9 +33,15 @@ class UserController extends Controller
     public function registercheck (Request $request){
 
         $validation = $request->validate([
-            'name'=>'required',
-            'email'=>'required|email|unique:users,email',
+            // Validasi nama: wajib susunan huruf dan spasi saja (tidak boleh ada angka)
+            'name'=>'required|regex:/^[a-zA-Z\s]+$/',
+            // Validasi email: wajib diakhiri dengan domain @gmail.com
+            'email'=>'required|email|ends_with:@gmail.com|unique:users,email',
             'password'=>'required|min:8',
+        ], [
+            // Pesan error kustom untuk kebutuhan sidang skripsi
+            'name.regex' => 'Format nama tidak sah! Nama lengkap hanya boleh berupa susunan huruf dan spasi tanpa angka.',
+            'email.ends_with' => 'Pendaftaran ditolak! Akun kemitraan wajib menggunakan domain email resmi @gmail.com.',
         ]);
 
         $validation['password'] = Hash::make($validation['password']);

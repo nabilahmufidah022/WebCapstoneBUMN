@@ -51,7 +51,8 @@ class MitraParticipationController extends Controller
         // Ambil daftar mitra untuk dropdown modal
         $mitras = Mitra::whereIn('status', ['approved', 'Approved', '1', 1, 2])->get();
 
-        return view('partnership.participation_list', compact('participations', 'mitras'));
+        // SINKRONISASI ERROR SESS: Melempar variabel $user agar terbaca oleh pengecekan usertype di view
+        return view('partnership.participation_list', compact('participations', 'mitras', 'user'));
     }
 
     /**
@@ -217,3 +218,4 @@ class MitraParticipationController extends Controller
                          ->with('success', 'Data silabus berhasil dihapus.');
     }
 }
+

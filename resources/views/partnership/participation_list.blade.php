@@ -139,178 +139,177 @@
     @php $currentMonth = null; @endphp
 
     @forelse($participations as $item)
-    @php
-        $monthYear = \Carbon\Carbon::parse($item->tanggal_pelatihan)->translatedFormat('F Y');
-        $tanggalPelatihan = \Carbon\Carbon::parse($item->tanggal_pelatihan);
-    @endphp
+        @php
+            $monthYear = \Carbon\Carbon::parse($item->tanggal_pelatihan)->translatedFormat('F Y');
+            $tanggalPelatihan = \Carbon\Carbon::parse($item->tanggal_pelatihan);
+        @endphp
 
-    @if($monthYear !== $currentMonth)
-        <div class="row">
-            <div class="col-12">
-                <div class="month-group-header">
-                    <span class="month-group-title">
-                        <i class="bx bx-calendar-event me-2"></i> AGENDA {{ $monthYear }}
-                    </span>
+        @if($monthYear !== $currentMonth)
+            <div class="row">
+                <div class="col-12">
+                    <div class="month-group-header">
+                        <span class="month-group-title">
+                            <i class="bx bx-calendar-event me-2"></i> AGENDA {{ $monthYear }}
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-        @php $currentMonth = $monthYear; @endphp
-    @endif
+            @php $currentMonth = $monthYear; @endphp
+        @endif
 
-    <div class="card card-agenda border-0 shadow-sm mb-3" style="border-radius: 15px;">
-        <div class="card-body p-0">
-            <div class="table-container-fix">
-                <table class="table table-custom align-middle">
-                    <tbody>
-                        <tr>
-                            <td class="ps-4" style="width: 15%;">
-                                <span class="text-label">Tanggal</span>
-                                <div class="text-data-main">{{ $tanggalPelatihan->translatedFormat('d M Y') }}</div>
-                            </td>
+        <div class="card card-agenda border-0 shadow-sm mb-3" style="border-radius: 15px;">
+            <div class="card-body p-0">
+                <div class="table-container-fix">
+                    <table class="table table-custom align-middle">
+                        <tbody>
+                            <tr>
+                                <td class="ps-4" style="width: 15%;">
+                                    <span class="text-label">Tanggal</span>
+                                    <div class="text-data-main">{{ $tanggalPelatihan->translatedFormat('d M Y') }}</div>
+                                </td>
 
-                            <td style="width: 18%;">
-                                <span class="text-label">Waktu</span>
-                                <div class="d-flex align-items-center gap-1">
-                                    <i class="bx bx-time-five text-primary" style="font-size: 14px;"></i>
-                                    <span class="text-data-main" style="font-size: 12px;">{{ $item->waktu_pelatihan }}</span>
-                                    <span class="small fw-bold text-muted">WIB</span>
-                                </div>
-                            </td>
-
-                            <td class="text-center" style="width: 10%;">
-                                <span class="text-label">Mode</span>
-                                <span class="badge-mode {{ $item->pelaksanaan == 'online' ? 'bg-soft-danger' : '' }}">
-                                    {{ strtoupper($item->pelaksanaan) }}
-                                </span>
-                            </td>
-
-                            <td style="width: 25%;">
-                                <span class="text-label">Materi Pelatihan</span>
-                                <div class="text-data-main text-truncate" title="{{ $item->judul_pelatihan }}">{{ $item->judul_pelatihan }}</div>
-                                <div class="text-muted mt-1" style="font-size: 11px;"><i class="bx bx-tag-alt me-1"></i> {{ $item->kategori }}</div>
-                            </td>
-
-                            <td style="width: 18%;">
-                                <span class="text-label">Mitra Kerjasama</span>
-                                <div class="text-data-main text-primary text-truncate">{{ $item->mitra->nama_perusahaan ?? '-' }}</div>
-                                <div class="text-muted mt-1 text-truncate" style="font-size: 10px;"><i class="bx bx-map-pin"></i> {{ $item->tempat_pelatihan }}</div>
-                            </td>
-
-                            <td class="pe-4 text-center" style="width: 16%;">
-                                <span class="text-label">Aksi</span>
-                                <div class="d-flex flex-column align-items-center gap-2">
-
-                                    @if($item->status == 'Selesai')
-                                        <span class="badge bg-success fw-bold" style="font-size: 9px; border-radius: 4px; padding: 4px 8px;">
-                                            <i class="bx bx-check-double"></i> SELESAI
-                                        </span>
-                                    @elseif($tanggalPelatihan->isToday() || $tanggalPelatihan->isPast())
-                                        <span class="badge {{ $tanggalPelatihan->isToday() ? 'bg-primary' : 'bg-danger' }} fw-bold mb-1" style="font-size: 9px; border-radius: 4px; padding: 4px 8px;">
-                                            <i class="bx {{ $tanggalPelatihan->isToday() ? 'bx-play-circle' : 'bx-error-circle' }}"></i>
-                                            {{ $tanggalPelatihan->isToday() ? 'HARI INI' : 'TERLEWAT' }}
-                                        </span>
-                                        @if(auth()->user()->usertype === 'admin')
-                                            {{-- Fix: Menggunakan $item->id --}}
-                                            <a href="{{ route('mitra.participation.complete', $item->id) }}" class="btn btn-success btn-sm px-2 fw-bold" style="font-size: 10px; border-radius: 6px;">Selesaikan</a>
-                                        @endif
-                                    @else
-                                        <span class="badge bg-warning text-dark fw-bold" style="font-size: 9px; border-radius: 4px; padding: 4px 8px;">
-                                            <i class="bx bx-time"></i> AKAN DATANG
-                                        </span>
-                                    @endif
-
-                                    <div class="d-flex gap-1 mt-1">
-                                        <a href="{{ route('mitra.participation.show', $item->id) }}" class="btn btn-light btn-sm border px-2 fw-bold text-dark" style="font-size: 10px; border-radius: 6px;">Detail</a>
-
-                                        @if(auth()->user()->usertype === 'admin')
-                                            <button type="button" class="btn btn-light btn-sm border text-primary px-2" style="border-radius: 6px;" data-bs-toggle="modal" data-bs-target="#editModal{{ $item->id }}">
-                                                <i class="bx bx-edit"></i>
-                                            </button>
-
-                                            <form action="{{ route('mitra.participation.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus agenda?')" class="m-0">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn btn-light btn-sm border text-danger px-2" style="border-radius: 6px;"><i class="bx bx-trash"></i></button>
-                                            </form>
-                                        @endif
+                                <td style="width: 18%;">
+                                    <span class="text-label">Waktu</span>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <i class="bx bx-time-five text-primary" style="font-size: 14px;"></i>
+                                        <span class="text-data-main" style="font-size: 12px;">{{ $item->waktu_pelatihan }}</span>
+                                        <span class="small fw-bold text-muted">WIB</span>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+
+                                <td class="text-center" style="width: 10%;">
+                                    <span class="text-label">Mode</span>
+                                    <span class="badge-mode {{ $item->pelaksanaan == 'online' ? 'bg-soft-danger' : '' }}">
+                                        {{ strtoupper($item->pelaksanaan) }}
+                                    </span>
+                                </td>
+
+                                <td style="width: 25%;">
+                                    <span class="text-label">Materi Pelatihan</span>
+                                    <div class="text-data-main text-truncate" title="{{ $item->judul_pelatihan }}">{{ $item->judul_pelatihan }}</div>
+                                    <div class="text-muted mt-1" style="font-size: 11px;"><i class="bx bx-tag-alt me-1"></i> {{ $item->kategori }}</div>
+                                </td>
+
+                                <td style="width: 18%;">
+                                    <span class="text-label">Mitra Kerjasama</span>
+                                    <div class="text-data-main text-primary text-truncate">{{ $item->mitra->nama_perusahaan ?? '-' }}</div>
+                                    <div class="text-muted mt-1 text-truncate" style="font-size: 10px;"><i class="bx bx-map-pin"></i> {{ $item->tempat_pelatihan }}</div>
+                                </td>
+
+                                <td class="pe-4 text-center" style="width: 16%;">
+                                    <span class="text-label">Aksi</span>
+                                    <div class="d-flex flex-column align-items-center gap-2">
+
+                                        @if($item->status == 'Selesai')
+                                            <span class="badge bg-success fw-bold" style="font-size: 9px; border-radius: 4px; padding: 4px 8px;">
+                                                <i class="bx bx-check-double"></i> SELESAI
+                                            </span>
+                                        @elseif($tanggalPelatihan->isToday() || $tanggalPelatihan->isPast())
+                                            <span class="badge {{ $tanggalPelatihan->isToday() ? 'bg-primary' : 'bg-danger' }} fw-bold mb-1" style="font-size: 9px; border-radius: 4px; padding: 4px 8px;">
+                                                <i class="bx {{ $tanggalPelatihan->isToday() ? 'bx-play-circle' : 'bx-error-circle' }}"></i>
+                                                {{ $tanggalPelatihan->isToday() ? 'HARI INI' : 'TERLEWAT' }}
+                                            </span>
+                                            @if(auth()->user()->usertype === 'admin')
+                                                <a href="{{ route('mitra.participation.complete', $item->id) }}" class="btn btn-success btn-sm px-2 fw-bold" style="font-size: 10px; border-radius: 6px;">Selesaikan</a>
+                                            @endif
+                                        @else
+                                            <span class="badge bg-warning text-dark fw-bold" style="font-size: 9px; border-radius: 4px; padding: 4px 8px;">
+                                                <i class="bx bx-time"></i> AKAN DATANG
+                                            </span>
+                                        @endif
+
+                                        <div class="d-flex gap-1 mt-1">
+                                            <a href="{{ route('mitra.participation.show', $item->id) }}" class="btn btn-light btn-sm border px-2 fw-bold text-dark" style="font-size: 10px; border-radius: 6px;">Detail</a>
+
+                                            @if(auth()->user()->usertype === 'admin')
+                                                <button type="button" class="btn btn-light btn-sm border text-primary px-2" style="border-radius: 6px;" data-bs-toggle="modal" data-bs-target="#editModal{{ $item->id }}">
+                                                    <i class="bx bx-edit"></i>
+                                                </button>
+
+                                                <form action="{{ route('mitra.participation.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus agenda?')" class="m-0">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="btn btn-light btn-sm border text-danger px-2" style="border-radius: 6px;"><i class="bx bx-trash"></i></button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    {{-- MODAL EDIT --}}
-    @if(auth()->user()->usertype === 'admin')
-    <div class="modal fade" id="editModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <form action="{{ route('mitra.participation.update', $item->id) }}" method="POST">
-                @csrf @method('PUT')
-                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                    <div class="modal-header bg-dark text-white border-0 py-3" style="border-radius: 20px 20px 0 0;">
-                        <h6 class="modal-title fw-bold" style="font-size: 14px;"><i class="bx bx-edit me-2"></i>Edit Agenda Silabus</h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        {{-- MODAL EDIT --}}
+        @if(auth()->user()->usertype === 'admin')
+        <div class="modal fade" id="editModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <form action="{{ route('mitra.participation.update', $item->id) }}" method="POST">
+                    @csrf @method('PUT')
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                        <div class="modal-header bg-dark text-white border-0 py-3" style="border-radius: 20px 20px 0 0;">
+                            <h6 class="modal-title fw-bold" style="font-size: 14px;"><i class="bx bx-edit me-2"></i>Edit Agenda Silabus</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <div class="mb-3">
+                                <label class="text-label">Judul Pelatihan</label>
+                                <input type="text" name="judul_pelatihan" class="form-control form-control-sm" value="{{ $item->judul_pelatihan }}" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="text-label">Tanggal</label>
+                                    <input type="date" name="tanggal_pelatihan" class="form-control form-control-sm" value="{{ $item->tanggal_pelatihan }}" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-label">Waktu</label>
+                                    <input type="text" name="waktu_pelatihan" class="form-control form-control-sm" value="{{ $item->waktu_pelatihan }}" required>
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="text-label">Kategori</label>
+                                    <select name="kategori" class="form-select form-select-sm">
+                                        <option value="Literasi digital" {{ $item->kategori == 'Literasi digital' ? 'selected' : '' }}>Literasi Digital</option>
+                                        <option value="Literasi Bisnis" {{ $item->kategori == 'Literasi Bisnis' ? 'selected' : '' }}>Literasi Bisnis</option>
+                                        <option value="Literasi Dasar" {{ $item->kategori == 'Literasi Dasar' ? 'selected' : '' }}>Literasi Dasar</option>
+                                        <option value="Tematik" {{ $item->kategori == 'Tematik' ? 'selected' : '' }}>Tematik</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-label">Pelaksanaan</label>
+                                    <select name="pelaksanaan" class="form-select form-select-sm">
+                                        <option value="online" {{ $item->pelaksanaan == 'online' ? 'selected' : '' }}>Online</option>
+                                        <option value="offline" {{ $item->pelaksanaan == 'offline' ? 'selected' : '' }}>Offline</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-label">Narasumber</label>
+                                <input type="text" name="narasumber" class="form-control form-control-sm" value="{{ $item->narasumber }}" required>
+                            </div>
+                            <div class="mb-0">
+                                <label class="text-label">Lokasi</label>
+                                <input type="text" name="tempat_pelatihan" class="form-control form-control-sm" value="{{ $item->tempat_pelatihan }}" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 p-4 pt-0">
+                            <button type="submit" class="btn btn-dark w-100 fw-bold py-2 shadow-sm" style="border-radius: 10px;">Simpan Perubahan</button>
+                        </div>
                     </div>
-                    <div class="modal-body p-4 text-start">
-                        <div class="mb-3">
-                            <label class="text-label">Judul Pelatihan</label>
-                            <input type="text" name="judul_pelatihan" class="form-control form-control-sm" value="{{ $item->judul_pelatihan }}" required>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="text-label">Tanggal</label>
-                                <input type="date" name="tanggal_pelatihan" class="form-control form-control-sm" value="{{ $item->tanggal_pelatihan }}" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="text-label">Waktu</label>
-                                <input type="text" name="waktu_pelatihan" class="form-control form-control-sm" value="{{ $item->waktu_pelatihan }}" required>
-                            </div>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="text-label">Kategori</label>
-                                <select name="kategori" class="form-select form-select-sm">
-                                    <option value="Literasi digital" {{ $item->kategori == 'Literasi digital' ? 'selected' : '' }}>Literasi Digital</option>
-                                    <option value="Literasi Bisnis" {{ $item->kategori == 'Literasi Bisnis' ? 'selected' : '' }}>Literasi Bisnis</option>
-                                    <option value="Literasi Dasar" {{ $item->kategori == 'Literasi Dasar' ? 'selected' : '' }}>Literasi Dasar</option>
-                                    <option value="Tematik" {{ $item->kategori == 'Tematik' ? 'selected' : '' }}>Tematik</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="text-label">Pelaksanaan</label>
-                                <select name="pelaksanaan" class="form-select form-select-sm">
-                                    <option value="online" {{ $item->pelaksanaan == 'online' ? 'selected' : '' }}>Online</option>
-                                    <option value="offline" {{ $item->pelaksanaan == 'offline' ? 'selected' : '' }}>Offline</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="text-label">Narasumber</label>
-                            <input type="text" name="narasumber" class="form-control form-control-sm" value="{{ $item->narasumber }}" required>
-                        </div>
-                        <div class="mb-0">
-                            <label class="text-label">Lokasi</label>
-                            <input type="text" name="tempat_pelatihan" class="form-control form-control-sm" value="{{ $item->tempat_pelatihan }}" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="submit" class="btn btn-dark w-100 fw-bold py-2 shadow-sm" style="border-radius: 10px;">Simpan Perubahan</button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-    @endif
+        @endif
 
     @empty
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
-        <div class="card-body text-center py-5">
-            <i class="bx bx-calendar-x text-muted" style="font-size: 48px;"></i>
-            <h6 class="mt-3 fw-bold text-muted">Belum ada agenda pelatihan yang dijadwalkan.</h6>
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-calendar-x text-muted" style="font-size: 48px;"></i>
+                <h6 class="mt-3 fw-bold text-muted">Belum ada agenda pelatihan yang dijadwalkan.</h6>
+            </div>
         </div>
-    </div>
     @endforelse
 
     {{-- MODAL INPUT --}}
@@ -325,13 +324,27 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4 text-start">
-                        <div class="mb-3"><label class="text-label">Mitra Kerjasama</label>
-                            <select name="mitra_id" class="form-select form-select-sm" required>
+                        <div class="mb-3">
+                            <label class="text-label">Mitra Kerjasama</label>
+                            <select name="mitra_id" id="mitraSelect" class="form-select form-select-sm" required>
                                 <option value="">-- Pilih Mitra --</option>
                                 @foreach($mitras as $mitra)
-                                    <option value="{{ $mitra->id }}">{{ $mitra->nama_perusahaan }}</option>
+                                    @php
+                                        $bidangJson = is_array($mitra->bidang_perusahaan)
+                                            ? json_encode($mitra->bidang_perusahaan)
+                                            : json_encode([$mitra->bidang_perusahaan ?? '']);
+                                    @endphp
+                                    <option value="{{ $mitra->id }}" data-bidang='{{ $bidangJson }}'>
+                                        {{ $mitra->nama_perusahaan }}
+                                    </option>
                                 @endforeach
                             </select>
+
+                            {{-- KONTAINER PRATINJAU BADGES (SUDAH DIRAPIKAN UKURAN & SPACINGNYA) --}}
+                            <div id="bidangPreviewContainer" class="mt-2 mb-3 d-none">
+                                <small class="text-label mb-2 d-block" style="color: #64748b; letter-spacing: 0.5px;">📌 Kategori Terdaftar Mitra Ini</small>
+                                <div id="bidangBadgesList" class="d-flex flex-wrap gap-1 pt-1"></div>
+                            </div>
                         </div>
                         <div class="mb-3"><label class="text-label">Judul Pelatihan</label>
                             <input type="text" name="judul_pelatihan" class="form-control form-control-sm" required placeholder="Judul materi...">
@@ -372,5 +385,78 @@
     </div>
     @endif
 </div>
-@endsection
 
+{{-- SCRIPT JAVASCRIPT REALTIME BADGES PRATINJAU --}}
+@if(auth()->user()->usertype === 'admin')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mitraSelect = document.getElementById('mitraSelect');
+        const previewContainer = document.getElementById('bidangPreviewContainer');
+        const badgesList = document.getElementById('bidangBadgesList');
+
+        if(mitraSelect) {
+            mitraSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const bidangDataAttr = selectedOption.getAttribute('data-bidang');
+
+                // Reset list badges terlebih dahulu setiap ada perubahan dropdown
+                badgesList.innerHTML = '';
+
+                if (bidangDataAttr) {
+                    try {
+                        const bidangArray = JSON.parse(bidangDataAttr);
+
+                        if (bidangArray && bidangArray.length > 0 && bidangArray[0] !== '') {
+                            bidangArray.forEach(function (bidang) {
+                                const badgeSpan = document.createElement('span');
+                                // Menyelaraskan padding dan ukuran huruf dengan kolom teks form
+                                badgeSpan.className = 'badge bg-light text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold';
+                                badgeSpan.style.fontSize = '11.5px';
+                                badgeSpan.textContent = bidang;
+                                badgesList.appendChild(badgeSpan);
+                            });
+                            previewContainer.classList.remove('d-none');
+                        } else {
+                            showNoCategory();
+                        }
+                    } catch (e) {
+                        // Fallback jika data di DB berupa teks string murni
+                        const badgeSpan = document.createElement('span');
+                        badgeSpan.className = 'badge bg-light text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold';
+                        badgeSpan.style.fontSize = '11.5px';
+                        badgeSpan.textContent = bidangDataAttr.replace(/[\[\]"']/g, '');
+                        badgesList.appendChild(badgeSpan);
+                        previewContainer.classList.remove('d-none');
+                    }
+                } else {
+                    previewContainer.classList.add('d-none');
+                }
+            });
+        }
+
+        function showNoCategory() {
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = 'badge bg-light text-secondary px-2.5 py-1.5 rounded-pill fw-bold';
+            badgeSpan.style.fontSize = '11.5px';
+            badgeSpan.textContent = 'Belum mendaftarkan kategori';
+            badgesList.appendChild(badgeSpan);
+            previewContainer.classList.remove('d-none');
+        }
+    });
+</script>
+@endif
+
+@if(auth()->user()->usertype === 'admin')
+<script>
+    function openCetakPreviewModal() {
+        var myModal = new bootstrap.Modal(document.getElementById('modalPreviewCetak'));
+        myModal.show();
+    }
+
+    function showIdentitasMitra(id) {
+        window.location.href = "/mitra/detail-identitas/" + id;
+    }
+</script>
+@endif
+
+@endsection

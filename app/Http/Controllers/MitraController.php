@@ -197,6 +197,7 @@ class MitraController extends Controller
     /**
      * Menambahkan Mitra Secara Manual oleh Admin
      * FITUR REVISI DOSEN: Menerima masukan multi-checkbox kategori berupa array
+     * PROTEKSI PENGETATAN DATA: Nama PIC wajib huruf murni, No HP wajib angka murni
      */
     public function storeManual(Request $request)
     {
@@ -205,11 +206,17 @@ class MitraController extends Controller
         }
 
         $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
-            'no_telepon' => 'required|string|max:20',
+            // Validasi nama_lengkap: Hanya susunan huruf alfabet besar, kecil, dan spasi saja
+            'nama_lengkap' => 'required|string|regex:/^[a-zA-Z\s]+$/|max:255',
+            // Validasi no_telepon: Hanya berisi susunan angka numerik murni
+            'no_telepon' => 'required|regex:/^[0-9]+$/|max:20',
             'nama_perusahaan' => 'required|string|max:255',
             'bidang_perusahaan' => 'required|array', // Diubah menjadi array wajib
             'lokasi_perusahaan' => 'required|string|max:255',
+        ], [
+            // Pesan penolakan kustom di backend admin demi keselarasan data skripsi
+            'nama_lengkap.regex' => 'Gagal menyimpan! Nama penanggung jawab PIC dilarang menggunakan karakter angka.',
+            'no_telepon.regex' => 'Gagal menyimpan! Input nomor handphone wajib diisi dengan angka numerik murni.',
         ]);
 
         $mitra = Mitra::create([
@@ -246,7 +253,7 @@ class MitraController extends Controller
     }
 
     /**
-     * Proses Alur Pendaftaran Mandiri oleh Mitra
+     * Process Alur Pendaftaran Mandiri oleh Mitra
      */
     public function goDaftarMitra()
     {

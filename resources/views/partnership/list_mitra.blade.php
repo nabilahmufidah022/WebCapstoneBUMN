@@ -139,7 +139,7 @@
                             <td>
                                 @if($mitra->status_aktif == 'Aktif')
                                     <span class="badge bg-success-soft text-success px-3 rounded-pill fw-bold">
-                                        <i class="bx bxs-check-shield me-1"></i> Aktif
+                                        <i class="bx bxs-check-shield me-1"></i> ... Aktif
                                     </span>
                                 @else
                                     <span class="badge bg-secondary-soft text-muted px-3 rounded-pill fw-bold" title="Keterlibatan tahun ini minim (1-3 kali)">
@@ -311,11 +311,27 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="small fw-bold text-muted mb-1">NAMA PIC</label>
-                                    <input type="text" name="nama_lengkap" class="form-control rounded-3" required>
+                                    {{-- PROTEKSI DATA: Hanya diperbolehkan susunan huruf dan spasi murni --}}
+                                    <input type="text"
+                                           name="nama_lengkap"
+                                           class="form-control rounded-3"
+                                           placeholder="Nama Penanggung Jawab"
+                                           pattern="^[a-zA-Z\s]+$"
+                                           title="Nama PIC hanya boleh berisi susunan huruf dan spasi (tanpa angka)"
+                                           oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                                           required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="small fw-bold text-muted mb-1">NOMOR TELEPON</label>
-                                    <input type="text" name="no_telepon" class="form-control rounded-3" placeholder="08xxxxxxxx" required>
+                                    {{-- PROTEKSI DATA: Hanya diperbolehkan susunan angka murni numerik --}}
+                                    <input type="tel"
+                                           name="no_telepon"
+                                           class="form-control rounded-3"
+                                           placeholder="08xxxxxxxx"
+                                           pattern="^[0-9]+$"
+                                           title="Nomor telepon wajib berupa susunan angka numerik murni"
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                           required>
                                 </div>
                             </div>
                             <div class="mb-0">
