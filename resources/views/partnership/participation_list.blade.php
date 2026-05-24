@@ -260,7 +260,8 @@
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
                                     <label class="text-label">Tanggal</label>
-                                    <input type="date" name="tanggal_pelatihan" class="form-control form-control-sm" value="{{ $item->tanggal_pelatihan }}" required>
+                                    {{-- TAMBAHAN: CLASS tanggal-input-restrict UNTUK DIKUNCI JAVASCRIPT --}}
+                                    <input type="date" name="tanggal_pelatihan" class="form-control form-control-sm tanggal-input-restrict" value="{{ $item->tanggal_pelatihan }}" required>
                                 </div>
                                 <div class="col-6">
                                     <label class="text-label">Waktu</label>
@@ -340,7 +341,7 @@
                                 @endforeach
                             </select>
 
-                            {{-- KONTAINER PRATINJAU BADGES (SUDAH DIRAPIKAN UKURAN & SPACINGNYA) --}}
+                            {{-- KONTAINER PRATINJAU BADGES --}}
                             <div id="bidangPreviewContainer" class="mt-2 mb-3 d-none">
                                 <small class="text-label mb-2 d-block" style="color: #64748b; letter-spacing: 0.5px;">📌 Kategori Terdaftar Mitra Ini</small>
                                 <div id="bidangBadgesList" class="d-flex flex-wrap gap-1 pt-1"></div>
@@ -351,7 +352,8 @@
                         </div>
                         <div class="row g-2 mb-3">
                             <div class="col-6"><label class="text-label">Tanggal</label>
-                                <input type="date" name="tanggal_pelatihan" class="form-control form-control-sm" required></div>
+                                {{-- TAMBAHAN: ID tanggal_pelatihan_add UNTUK DIKUNCI JAVASCRIPT --}}
+                                <input type="date" id="tanggal_pelatihan_add" name="tanggal_pelatihan" class="form-control form-control-sm tanggal-input-restrict" required></div>
                             <div class="col-6"><label class="text-label">Waktu</label>
                                 <input type="text" name="waktu_pelatihan" class="form-control form-control-sm" placeholder="09:00 - 12:00" required></div>
                         </div>
@@ -409,7 +411,6 @@
                         if (bidangArray && bidangArray.length > 0 && bidangArray[0] !== '') {
                             bidangArray.forEach(function (bidang) {
                                 const badgeSpan = document.createElement('span');
-                                // Menyelaraskan padding dan ukuran huruf dengan kolom teks form
                                 badgeSpan.className = 'badge bg-light text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold';
                                 badgeSpan.style.fontSize = '11.5px';
                                 badgeSpan.textContent = bidang;
@@ -420,7 +421,6 @@
                             showNoCategory();
                         }
                     } catch (e) {
-                        // Fallback jika data di DB berupa teks string murni
                         const badgeSpan = document.createElement('span');
                         badgeSpan.className = 'badge bg-light text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold';
                         badgeSpan.style.fontSize = '11.5px';
@@ -442,6 +442,31 @@
             badgesList.appendChild(badgeSpan);
             previewContainer.classList.remove('d-none');
         }
+    });
+</script>
+@endif
+
+{{-- LOGIKA JAVASCRIPT UNTUK MENGUNCI TANGGAL MASA LALU SECARA SEAMLESS --}}
+@if(auth()->user()->usertype === 'admin')
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Get today's local date parameters
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1; 
+        let dd = today.getDate();
+
+        if (mm < 10) mm = '0' + mm;
+        if (dd < 10) dd = '0' + dd;
+
+        // Formatted to standard input date format: YYYY-MM-DD
+        const minDateString = yyyy + '-' + mm + '-' + dd;
+
+        // Apply restriction across all date input fields using custom target class
+        const restrictedInputs = document.querySelectorAll('.tanggal-input-restrict');
+        restrictedInputs.forEach(function(inputElement) {
+            inputElement.min = minDateString;
+        });
     });
 </script>
 @endif

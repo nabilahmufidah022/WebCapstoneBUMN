@@ -54,7 +54,7 @@
 
                             <div class="mb-3">
                                 <label class="small mb-1" for="bidang_perusahaan">Bidang Usaha</label>
-                                <input type="text" class="form-control" id="bidang_perusahaan" name="bidang_perusahaan" value="{{ old('bidang_perusahaan', $mitra->bidang_perusahaan) }}" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="{{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">
+                                <input type="text" class="form-control" id="bidang_perusahaan" name="bidang_perusahaan" value="{{ old('bidang_perusahaan', is_array($mitra->bidang_perusahaan) ? implode(', ', $mitra->bidang_perusahaan) : $mitra->bidang_perusahaan) }}" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="{{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">
                             </div>
 
                             <div class="mb-3">
