@@ -206,29 +206,31 @@ class MitraController extends Controller
         }
 
         $request->validate([
-            // Validasi nama_lengkap: Hanya susunan huruf alfabet besar, kecil, dan spasi saja
             'nama_lengkap' => 'required|string|regex:/^[a-zA-Z\s]+$/|max:255',
-            // Validasi no_telepon: Hanya berisi susunan angka numerik murni
             'no_telepon' => 'required|regex:/^[0-9]+$/|max:20',
             'nama_perusahaan' => 'required|string|max:255',
-            'bidang_perusahaan' => 'required|array', // Diubah menjadi array wajib
+            'bidang_perusahaan' => 'required|array',
             'lokasi_perusahaan' => 'required|string|max:255',
         ], [
-            // Pesan penolakan kustom di backend admin demi keselarasan data skripsi
-            'nama_lengkap.regex' => 'Gagal menyimpan! Nama penanggung jawab PIC dilarang menggunakan karakter angka.',
-            'no_telepon.regex' => 'Gagal menyimpan! Input nomor handphone wajib diisi dengan angka numerik murni.',
+            'nama_lengkap.required' => 'Kolom nama penanggung jawab wajib diisi.',
+            'nama_lengkap.regex' => 'Nama penanggung jawab PIC dilarang menggunakan karakter angka atau simbol.',
+            'no_telepon.required' => 'Kolom nomor telepon wajib diisi.',
+            'no_telepon.regex' => 'Input nomor handphone wajib diisi dengan angka numerik murni.',
+            'nama_perusahaan.required' => 'Kolom nama perusahaan wajib diisi.',
+            'bidang_perusahaan.required' => 'Wajib memilih minimal satu kategori bidang usaha.',
+            'lokasi_perusahaan.required' => 'Kolom lokasi perusahaan wajib diisi.',
         ]);
 
         $mitra = Mitra::create([
             'nama_lengkap' => $request->nama_lengkap,
             'no_telepon' => $request->no_telepon,
             'nama_perusahaan' => $request->nama_perusahaan,
-            'bidang_perusahaan' => $request->bidang_perusahaan, // Otomatis dicast ke JSON oleh Model
+            'bidang_perusahaan' => $request->bidang_perusahaan,
             'lokasi_perusahaan' => $request->lokasi_perusahaan,
             'deskripsi_perusahaan' => $request->deskripsi_perusahaan ?? 'Input Manual oleh Admin',
             'status' => 2,
             'status_aktif' => 'Aktif',
-            'is_active' => true, // Default Mitra baru adalah Aktif (Grace Period)
+            'is_active' => true,
             'user_id' => Auth::id(),
         ]);
 
@@ -269,25 +271,39 @@ class MitraController extends Controller
 
     /**
      * Simpan Data Pendaftaran Mitra Baru (Status Awal Aktif)
-     * FITUR REVISI DOSEN: Mengubah validasi bidang_perusahaan agar mendukung input array checkbox
+     * SINKRONISASI SKRIPSI: Ditambahkan batasan error detail terpetakan ke kolom form
      */
     public function store(Request $request)
     {
         $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
-            'no_telepon' => 'required|string|max:20',
+            'nama_lengkap' => 'required|string|regex:/^[a-zA-Z\s]+$/|max:255',
+            'no_telepon' => 'required|regex:/^[0-9]+$/|max:20',
             'nama_perusahaan' => 'required|string|max:255',
-            'bidang_perusahaan' => 'required|array', // Diubah menjadi array wajib
+            'bidang_perusahaan' => 'required|array',
             'lokasi_perusahaan' => 'required|string|max:255',
             'deskripsi_perusahaan' => 'required|string',
-            'company_profile' => 'nullable|file|mimes:pdf|max:5120',
+            'company_profile' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'surat_permohonan_audiensi' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+        ], [
+            'nama_lengkap.required' => 'Kolom Nama Lengkap wajib diisi.',
+            'nama_lengkap.regex' => 'Pendaftaran gagal! Nama penanggung jawab PIC hanya boleh diisi susunan huruf alfabet.',
+            'no_telepon.required' => 'Kolom Nomor Telepon wajib diisi.',
+            'no_telepon.regex' => 'Pendaftaran gagal! Input nomor telepon wajib diisi susunan angka numerik murni.',
+            'nama_perusahaan.required' => 'Kolom Nama Perusahaan wajib diisi.',
+            'bidang_perusahaan.required' => 'Wajib memilih minimal satu Bidang Usaha / Kategori Pelatihan.',
+            'lokasi_perusahaan.required' => 'Kolom Alamat Perusahaan wajib diisi.',
+            'deskripsi_perusahaan.required' => 'Kolom Deskripsi Usaha wajib diisi.',
+            'company_profile.mimes' => 'Format file Company Profile harus berupa PDF, DOC, atau DOCX.',
+            'company_profile.max' => 'Ukuran berkas Company Profile maksimal berukuran 5MB.',
+            'surat_permohonan_audiensi.mimes' => 'Format file Surat Permohonan Audiensi harus berupa PDF, DOC, atau DOCX.',
+            'surat_permohonan_audiensi.max' => 'Ukuran berkas Surat Permohonan Audiensi maksimal berukuran 5MB.',
         ]);
 
         $data = $request->only([
             'nama_lengkap',
             'no_telepon',
             'nama_perusahaan',
-            'bidang_perusahaan', // Array checkbox tersimpan aman
+            'bidang_perusahaan',
             'lokasi_perusahaan',
             'deskripsi_perusahaan'
         ]);
@@ -295,12 +311,18 @@ class MitraController extends Controller
         $data['user_id'] = Auth::id();
         $data['status'] = 0; // Waiting Review
         $data['status_aktif'] = 'Aktif';
-        $data['is_active'] = true; // Status Aktif awal (Grace Period)
+        $data['is_active'] = true;
 
         if ($request->hasFile('company_profile')) {
             $fileName = time() . '_cp.' . $request->company_profile->extension();
             $request->company_profile->move(public_path('uploads/mitra'), $fileName);
             $data['company_profile'] = $fileName;
+        }
+
+        if ($request->hasFile('surat_permohonan_audiensi')) {
+            $fileNameAudiensi = time() . '_audiensi.' . $request->surat_permohonan_audiensi->extension();
+            $request->surat_permohonan_audiensi->move(public_path('uploads/mitra'), $fileNameAudiensi);
+            $data['surat_permohonan_audiensi'] = $fileNameAudiensi;
         }
 
         $mitra = Mitra::create($data);
