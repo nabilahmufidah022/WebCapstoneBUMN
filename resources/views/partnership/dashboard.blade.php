@@ -6,7 +6,17 @@
     <div class="mb-4 d-flex justify-content-between align-items-center">
         <div>
             <h3 class="fw-bold mb-1" style="letter-spacing: -0.02em;">Dashboard Monitoring</h3>
-            <p class="text-muted mb-0">Selamat datang kembali, <strong>{{ Auth::user()->name }}</strong>. Berikut ringkasan aktivitas sistem hari ini.</p>
+
+            {{-- LOGIKA SINKRONISASI UX: MEMBEDAKAN SAPAAN BERDASARKAN STATUS LEGALITAS DI DATABASE --}}
+            <p class="text-muted mb-0">
+                @if(Auth::user()->usertype == 'admin' || (Auth::user()->mitra && Auth::user()->mitra->status == 2))
+                    {{-- Kondisi 1: Untuk Admin atau Mitra lama yang SUDAH DI-APPROVE (Status 2) --}}
+                    Selamat datang kembali, <strong>{{ Auth::user()->name }}</strong> 👋 Berikut ringkasan aktivitas sistem hari ini.
+                @else
+                    {{-- Kondisi 2: Untuk Akun Baru Register, atau yang BARU SUBMIT FORM (Status masih pending/0/1) --}}
+                    Selamat datang, <strong>{{ Auth::user()->name }}</strong> 🎉 Berikut ringkasan aktivitas sistem Anda hari ini.
+                @endif
+            </p>
         </div>
         <div class="text-end">
             <span class="badge bg-white shadow-sm text-dark p-2 px-3 rounded-pill">
@@ -198,7 +208,7 @@
                                                     Berikan Feedback
                                                 </a>
                                             @else
-                                                {{-- Area Feedback Terkirim & Detail (Simetris) --}}
+                                                {{-- Area Feedback Terkirim & Detail --}}
                                                 <div class="d-flex flex-column align-items-end gap-1">
 
                                                     <span class="badge bg-success-soft text-success rounded-pill px-2 py-1"
