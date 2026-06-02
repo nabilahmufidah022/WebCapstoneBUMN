@@ -47,10 +47,19 @@ Route::middleware('auth')->group(function () {
     Route::get('kelola_pendaftaran', [MitraController::class, 'goKelolaPendaftaran'])->name('kelola_pendaftaran');
     Route::get('mitra/detail/{id}', [MitraController::class, 'detail'])->name('mitra.detail');
 
-    // SINKRONISASI ALUR SKRIPSI: Diubah menjadi GET & rujukan nama disesuaikan dengan tombol fungsional detail_mitra.blade
+    // ==========================================================================
+    // ALUR SINKRONISASI VERIFIKASI MITRA (Mencegah Error 500 & Mendukung SOP Skripsi)
+    // ==========================================================================
+
+    // 1. Digunakan oleh Tombol Tag <a> Link di halaman detail_mitra.blade.php (GET)
     Route::get('mitra/review/{id}', [MitraController::class, 'review'])->name('mitra.participation.review');
     Route::get('mitra/approve/{id}', [MitraController::class, 'approve'])->name('mitra.participation.approve');
     Route::get('mitra/reject/{id}', [MitraController::class, 'reject'])->name('mitra.participation.reject');
+
+    // 2. Digunakan oleh Form Submit di halaman kelola_pendaftaran.blade.php (POST)
+    Route::post('mitra/review/{id}', [MitraController::class, 'review'])->name('mitra.review');
+    Route::post('mitra/approve/{id}', [MitraController::class, 'approve'])->name('mitra.approve');
+    Route::post('mitra/reject/{id}', [MitraController::class, 'reject'])->name('mitra.reject');
 
     // Fitur Tambahan: Input Manual & Detail Identitas
     Route::post('mitra/store-manual', [MitraController::class, 'storeManual'])->name('mitra.storeManual');

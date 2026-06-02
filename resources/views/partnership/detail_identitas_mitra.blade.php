@@ -28,9 +28,25 @@
                     <label class="small fw-bold text-muted text-uppercase d-block mb-1">Nama Perusahaan</label>
                     <p class="h5 fw-bold text-primary">{{ $mitra->nama_perusahaan }}</p>
                 </div>
+
+                {{-- PERBAIKAN INTEGRASI AMAN: MENGURAI DATA ARRAY MENJADI MULTIPLE BADGES AGAR BEBAS TYPEERROR --}}
                 <div class="col-md-6">
                     <label class="small fw-bold text-muted text-uppercase d-block mb-1">Bidang Usaha</label>
-                    <p class="h5 fw-semibold">{{ $mitra->bidang_perusahaan }}</p>
+                    <div class="mt-1">
+                        @if(is_array($mitra->bidang_perusahaan) && count($mitra->bidang_perusahaan) > 0)
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach($mitra->bidang_perusahaan as $bidang)
+                                    <span class="badge bg-light text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill small fw-bold" style="font-size: 12px;">
+                                        {{ $bidang }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        @else
+                            <span class="badge bg-light text-secondary px-2 py-1 rounded-pill small fw-bold" style="font-size: 12px;">
+                                {{ $mitra->bidang_perusahaan ?? '-' }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="col-12"><hr class="my-2 text-muted opacity-25"></div>

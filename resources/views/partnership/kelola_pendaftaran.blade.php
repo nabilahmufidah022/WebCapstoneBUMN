@@ -48,7 +48,11 @@
 
                                 <h5 class="fw-bold mb-0 me-2">{{ $mitra->nama_perusahaan }}</h5>
 
-                                <span class="badge bg-warning text-dark">Pending</span>
+                                @if($mitra->status == 0)
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                @else
+                                    <span class="badge bg-info text-white">On Review</span>
+                                @endif
 
                             </div>
 
@@ -82,31 +86,51 @@
 
 
 
-                                <form action="{{ route('mitra.approve', $mitra->id) }}" method="POST" onsubmit="return confirm('Setujui pendaftaran mitra ini?')">
+                                @if($mitra->status == 1)
 
-                                    @csrf
+                                    <form action="{{ route('mitra.approve', $mitra->id) }}" method="POST" onsubmit="return confirm('Setujui pendaftaran mitra ini?')">
 
-                                    <button type="submit" class="btn btn-success btn-sm">
+                                        @csrf
+
+                                        <button type="submit" class="btn btn-success btn-sm">
+
+                                            <i class="bx bx-check"></i> Setujui
+
+                                        </button>
+
+                                    </form>
+
+
+
+                                    <form action="{{ route('mitra.reject', $mitra->id) }}" method="POST" onsubmit="return confirm('Tolak pendaftaran mitra ini?')">
+
+                                        @csrf
+
+                                        <button type="submit" class="btn btn-danger btn-sm">
+
+                                            <i class="bx bx-x"></i> Tolak
+
+                                        </button>
+
+                                    </form>
+
+                                @else
+
+                                    <button type="button" class="btn btn-success btn-sm opacity-50" disabled style="cursor: not-allowed;" title="Harap tinjau berkas di halaman detail terlebih dahulu">
 
                                         <i class="bx bx-check"></i> Setujui
 
                                     </button>
 
-                                </form>
 
 
-
-                                <form action="{{ route('mitra.reject', $mitra->id) }}" method="POST" onsubmit="return confirm('Tolak pendaftaran mitra ini?')">
-
-                                    @csrf
-
-                                    <button type="submit" class="btn btn-danger btn-sm">
+                                    <button type="button" class="btn btn-danger btn-sm opacity-50" disabled style="cursor: not-allowed;" title="Harap tinjau berkas di halaman detail terlebih dahulu">
 
                                         <i class="bx bx-x"></i> Tolak
 
                                     </button>
 
-                                </form>
+                                @endif
 
                             </div>
 
@@ -119,6 +143,8 @@
             </div>
 
         </div>
+
+
 
         @empty
 
