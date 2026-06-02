@@ -45,19 +45,20 @@ Route::middleware('auth')->group(function () {
     Route::get('list_mitra', [MitraController::class, 'goListMitra'])->name('list_mitra');
     Route::get('list_mitra/export', [MitraController::class, 'exportListMitra'])->name('list_mitra.export');
     Route::get('kelola_pendaftaran', [MitraController::class, 'goKelolaPendaftaran'])->name('kelola_pendaftaran');
-    Route::post('mitra/review/{id}', [MitraController::class, 'review'])->name('mitra.review');
-    Route::post('mitra/approve/{id}', [MitraController::class, 'approve'])->name('mitra.approve');
-    Route::post('mitra/reject/{id}', [MitraController::class, 'reject'])->name('mitra.reject');
     Route::get('mitra/detail/{id}', [MitraController::class, 'detail'])->name('mitra.detail');
 
-    // Fitur Baru: Input Manual & Detail Identitas
+    // SINKRONISASI ALUR SKRIPSI: Diubah menjadi GET & rujukan nama disesuaikan dengan tombol fungsional detail_mitra.blade
+    Route::get('mitra/review/{id}', [MitraController::class, 'review'])->name('mitra.participation.review');
+    Route::get('mitra/approve/{id}', [MitraController::class, 'approve'])->name('mitra.participation.approve');
+    Route::get('mitra/reject/{id}', [MitraController::class, 'reject'])->name('mitra.participation.reject');
+
+    // Fitur Tambahan: Input Manual & Detail Identitas
     Route::post('mitra/store-manual', [MitraController::class, 'storeManual'])->name('mitra.storeManual');
     Route::get('mitra/detail-identitas/{id}', [MitraController::class, 'detailIdentitas'])->name('mitra.detailIdentitas');
 
     // Silabus & Participation Feature Routes
     Route::prefix('mitra/participation')->group(function () {
         // 1. Statis
-        //
         Route::get('/', [MitraParticipationController::class, 'index'])->name('mitra.participation.index');
         Route::post('/', [MitraParticipationController::class, 'store'])->name('mitra.participation.store');
         Route::get('/export', [MitraParticipationController::class, 'export'])->name('mitra.participation.export');

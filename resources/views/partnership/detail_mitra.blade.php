@@ -250,37 +250,57 @@
           </div>
           <div class="card-body">
               <div class="d-grid gap-2">
-                  {{-- Tombol Review hanya muncul jika status masih baru/Pending (0) --}}
+                  
+                  {{-- ==========================================================================
+                       KONDISI A: JIKA STATUSNYA BARU DAFTAR / PENDING (STATUS = 0)
+                       ========================================================================== --}}
                   @if($mitra->status == 0)
-                  <form action="{{ route('mitra.review', $mitra->id) }}" method="POST">
-                      @csrf
-                      <button type="submit" class="btn btn-info w-100 fw-bold text-dark rounded-pill shadow-sm">
-                          <i class="bx bx-search-alt"></i> Mulai Periksa (Review)
-                      </button>
-                  </form>
-                  @endif
+                      <div class="alert alert-info small mb-2 text-start" style="border-radius: 8px; line-height: 1.4;">
+                          <i class="bx bx-info-circle me-1"></i> Harap klik tombol <strong>Mulai Periksa</strong> terlebih dahulu untuk membuka akses verifikasi.
+                      </div>
 
-                  {{-- Tombol Setujui/Tolak hanya muncul jika status belum Final (0 atau 1) --}}
-                  @if($mitra->status == 0 || $mitra->status == 1)
-                  <form action="{{ route('mitra.approve', $mitra->id) }}" method="POST">
-                      @csrf
-                      <button type="submit" class="btn btn-success w-100 fw-bold rounded-pill shadow-sm">
-                          <i class="bx bx-check"></i> Setujui Mitra
-                      </button>
-                  </form>
+                      <form action="{{ route('mitra.review', $mitra->id) }}" method="POST" class="m-0">
+                          @csrf
+                          <button type="submit" class="btn btn-info w-100 fw-bold text-dark rounded-pill shadow-sm py-2">
+                              <i class="bx bx-search-alt"></i> Mulai Periksa (Review)
+                          </button>
+                      </form>
 
-                  <form action="{{ route('mitra.reject', $mitra->id) }}" method="POST">
-                      @csrf
-                      <button type="submit" class="btn btn-danger w-100 fw-bold rounded-pill shadow-sm">
-                          <i class="bx bx-x"></i> Tolak Pendaftaran
+                      {{-- Tombol Setujui & Tolak Dikunci (Disabled) Secara Interaktif --}}
+                      <button type="button" class="btn btn-success fw-bold rounded-pill opacity-50 py-2" disabled style="cursor: not-allowed;">
+                          <i class="bx bx-check"></i> Setujui Mitra (Terkunci)
                       </button>
-                  </form>
+                      <button type="button" class="btn btn-danger fw-bold rounded-pill opacity-50 py-2" disabled style="cursor: not-allowed;">
+                          <i class="bx bx-x"></i> Tolak Pendaftaran (Terkunci)
+                      </button>
+
+                  {{-- ==========================================================================
+                       KONDISI B: JIKA STATUSNYA SUDAH SEDANG DITINJAU / ON REVIEW (STATUS = 1)
+                       ========================================================================== --}}
+                  @elseif($mitra->status == 1)
+                      <form action="{{ route('mitra.approve', $mitra->id) }}" method="POST" class="m-0" onsubmit="return confirm('Apakah Anda yakin ingin MENYETUJUI kemitraan ini?')">
+                          @csrf
+                          <button type="submit" class="btn btn-success w-100 fw-bold rounded-pill shadow-sm py-2">
+                              <i class="bx bx-check"></i> Setujui Mitra
+                          </button>
+                      </form>
+
+                      <form action="{{ route('mitra.reject', $mitra->id) }}" method="POST" class="m-0" onsubmit="return confirm('Apakah Anda yakin ingin MENOLAK pendaftaran kemitraan ini?')">
+                          @csrf
+                          <button type="submit" class="btn btn-danger w-100 fw-bold rounded-pill shadow-sm py-2">
+                              <i class="bx bx-x"></i> Tolak Pendaftaran
+                          </button>
+                      </form>
+
+                  {{-- ==========================================================================
+                       KONDISI C: JIKA SUDAH SELESAI DIPROSES FINAL (STATUS = 2 atau 3)
+                       ========================================================================== --}}
                   @else
-                  {{-- Pesan jika status sudah disetujui/ditolak --}}
-                  <div class="alert alert-light border text-center mb-0">
-                    <p class="small text-muted mb-0">Pendaftaran ini sudah diproses dan tidak memerlukan tindakan admin lagi.</p>
-                  </div>
+                      <div class="alert alert-light border text-center mb-0" style="border-radius: 8px;">
+                          <p class="small text-muted mb-0"><i class="bx bx-lock-alt me-1"></i> Pendaftaran ini sudah diproses dan tidak memerlukan tindakan admin lagi.</p>
+                      </div>
                   @endif
+
               </div>
           </div>
       </div>
