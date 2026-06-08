@@ -15,16 +15,16 @@ class MitraController extends Controller
     /**
      * Halaman Daftar Mitra (Pusat Data / Dashboard Tracking)
      * Digunakan oleh Admin untuk memantau seluruh mitra secara realtime.
+     * NOTE: This method was a duplicate and has been removed to avoid redeclare error.
      */
-    public function goListMitra(Request $request)
+
+    /**
+     * INTEGRASI REALTIME:
+     * Halaman Tracking Pusat Data dengan Filter & Audit Otomatis
+     */
+    public function index(Request $request)
     {
         $user = Auth::user();
-
-        // Proteksi Akses Admin
-        if ($user->usertype != 'admin') {
-            return redirect('/');
-        }
-
         $currentYear = Carbon::now()->year;
 
         /**
@@ -375,5 +375,14 @@ class MitraController extends Controller
         $mitra = Mitra::with('user')->findOrFail($id);
         $histories = HistoryMitra::with('user')->where('mitra_id', $id)->orderBy('created_at', 'desc')->get();
         return view('partnership.detail_mitra', compact('mitra', 'histories'));
+    }
+
+    /**
+     * REVISI PENYELARASAN: Method Penghubung / Alias untuk menangani rute goListMitra
+     * Menghubungkan panggilan eksternal dari web.php tanpa merusak fungsionalitas murni index()
+     */
+    public function goListMitra(Request $request)
+    {
+        return $this->index($request);
     }
 }

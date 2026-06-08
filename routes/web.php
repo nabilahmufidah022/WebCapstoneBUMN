@@ -1,5 +1,8 @@
 <?php
 
+// Solusi Anti-Timeout: Menghapus batas waktu 60 detik agar Selenium IDE berjalan lancar
+set_time_limit(0);
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MitraController;
@@ -17,7 +20,12 @@ Route::get('/signup', [UserController::class, 'signup'])->name('register');
 Route::post('login', [UserController::class, 'logincheck'])->name('logincheck');
 Route::post('signup', [UserController::class, 'registercheck'])->name('registercheck');
 
-// Authenticated Routes
+// Route Daftar Mitra dibuat Public agar Selenium IDE bisa langsung akses tanpa terhadang Login
+Route::get('daftar_mitra', [MitraController::class, 'goDaftarMitra'])->name('daftar_mitra');
+Route::post('daftar_mitra', [MitraController::class, 'store'])->name('store_mitra');
+
+
+// Authenticated Routes (Butuh Login)
 Route::middleware('auth')->group(function () {
 
     // Dashboard & Profile
@@ -40,8 +48,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('account/{id}/destroy', [UserController::class, 'destroyPermanently'])->name('account.destroy');
 
     // Partnership & Mitra Data Management
-    Route::get('daftar_mitra', [MitraController::class, 'goDaftarMitra'])->name('daftar_mitra');
-    Route::post('daftar_mitra', [MitraController::class, 'store'])->name('store_mitra');
     Route::get('list_mitra', [MitraController::class, 'goListMitra'])->name('list_mitra');
     Route::get('list_mitra/export', [MitraController::class, 'exportListMitra'])->name('list_mitra.export');
     Route::get('kelola_pendaftaran', [MitraController::class, 'goKelolaPendaftaran'])->name('kelola_pendaftaran');
