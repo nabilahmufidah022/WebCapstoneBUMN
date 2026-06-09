@@ -20,6 +20,26 @@ Route::get('/signup', [UserController::class, 'signup'])->name('register');
 Route::post('login', [UserController::class, 'logincheck'])->name('logincheck');
 Route::post('signup', [UserController::class, 'registercheck'])->name('registercheck');
 
+// 🌟 BARU: ALUR INTERNED WEB FORGOT PASSWORD (Bebas Eror Email & SSL)
+Route::get('/forgot-password', function () {
+    return view('login/forgot-password');
+})->name('password.request');
+
+// Route untuk memproses pengecekan email di database MySQL
+Route::post('/forgot-password', [UserController::class, 'checkEmailForReset'])->name('password.email');
+
+// Halaman form pembuatan kata sandi baru (Membawa proteksi data session email)
+Route::get('/reset-password', function () {
+    if (!session()->has('reset_email')) {
+        return redirect()->route('login');
+    }
+    return view('login/reset-password');
+})->name('password.reset.page');
+
+// Route eksekusi untuk mengubah/menimpa password lama di database MySQL
+Route::post('/reset-password', [UserController::class, 'executeInAppReset'])->name('password.update.execute');
+
+
 // Route Daftar Mitra dibuat Public agar Selenium IDE bisa langsung akses tanpa terhadang Login
 Route::get('daftar_mitra', [MitraController::class, 'goDaftarMitra'])->name('daftar_mitra');
 Route::post('daftar_mitra', [MitraController::class, 'store'])->name('store_mitra');

@@ -2,16 +2,20 @@
 
 @section('content')
 
-@if (session('success'))
-<div class="alert alert-success">{{ session('success') }}</div>
-@endif
-
 <div class="container-xl px-4 mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">Change Password</div>
                 <div class="card-body">
+
+                    {{-- KOMPONEN NOTIFIKASI SUKSES (Ditaruh di dalam card-body agar rapi) --}}
+                    @if (session('success'))
+                        <div class="alert alert-success border-0 rounded-3 mb-4 small" style="background-color: #e6f4ea; color: #137333;">
+                            <i class="bx bxs-check-circle me-1"></i> {{ session('success') }}
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('changePassword') }}">
                         @csrf
                         <div class="row">

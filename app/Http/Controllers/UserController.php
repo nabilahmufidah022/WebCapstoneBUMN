@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +24,7 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
-        if(Auth:: attempt($credential)){
+        if(Auth::attempt($credential)){
             return redirect()->route('dashboard');
         } else {
             return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
@@ -99,6 +100,7 @@ class UserController extends Controller
                 'perlu_evaluasi' => 0
             ];
 
+            // 🌟 SINKRONISASI NULL-SAFETY: Memastikan data ter-set meskipun profil mitra baru dibuat (masih null)
             if ($mitra) {
                 // 1. Ambil Histori Kerjasama Terbaru (Limit 5)
                 $participations = $mitra->mitraEventParticipations()->latest()->take(5)->get();
@@ -115,11 +117,21 @@ class UserController extends Controller
                     ->where('status', 'Selesai')
                     ->whereNull('rating_mitra')
                     ->count();
+
+                // Ambil data log audit keamanan password untuk ikon lonceng dashboard mitra
+                $notifications = \App\Models\HistoryMitra::where('mitra_id', $mitra->id)
+                    ->where('action', 'reviewed')
+                    ->latest()
+                    ->take(5)
+                    ->get();
             } else {
+                // Generasikan collection kosong sebagai penampung aman jika belum isi form pendaftaran
                 $participations = collect();
+                $notifications = collect(); 
             }
 
-            return view('partnership.dashboard', compact('user', 'mitra', 'participations', 'data'));
+            // Variabel 'notifications' dimasukkan ke dalam compact() agar bisa dirender di View
+            return view('partnership.dashboard', compact('user', 'mitra', 'participations', 'data', 'notifications'));
         }
     }
 
@@ -187,7 +199,7 @@ class UserController extends Controller
         // Lakukan pembaruan data dasar user account (Berlaku untuk Admin maupun Mitra)
         $user->update($data);
 
-        // [JALUR A] JALUR MANDIRI SEAMLESS: Hanya berjalan untuk user/mitra biasa (Bukan Admin) jika namanya diubah
+        // [JALUR A] JALUR MANDIRI SEAMLESS: 🌟 Ditambahkan proteksi pengecekan isset ($user->mitra)
         if ($user->usertype !== 'admin' && $namaLama !== $request->name && $user->mitra) {
 
             // Perbarui kolom penanggung jawab / nama lengkap di tabel mitra agar sinkron otomatis
@@ -231,7 +243,7 @@ class UserController extends Controller
             'email' => $request->new_pic_email,
         ]);
 
-        // 2. Jika akun terikat dengan data kemitraan Rumah BUMN, sinkronisasikan nama PIC utamanya beserta Nomor Teleponnya
+        // 2. 🌟 SINKRONISASI NULL-SAFETY: Hanya berjalan jika user sudah terdaftar resmi sebagai mitra
         if ($user->mitra) {
             $user->mitra->update([
                 'nama_lengkap' => $request->new_pic_name,
@@ -265,7 +277,82 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
+        // 🌟 SINKRONISASI NULL-SAFETY: Otomatis menulis log audit keamanan hanya jika data objek mitra ditemukan
+        if ($user->mitra) {
+            \App\Models\HistoryMitra::create([
+                'mitra_id'    => $user->mitra->id,
+                'action'      => 'reviewed',
+                'description' => "Pemberitahuan Keamanan: Anda telah berhasil memperbarui kata sandi akses akun pada tanggal " . now()->format('d-m-Y H:i') . " WIB.",
+                'user_id'     => Auth::id()
+            ]);
+        }
+
         return back()->with('success', 'Password changed successfully');
+    }
+
+    /**
+     * 🌟 TAHAP 1: Proses Verifikasi Email Masuk (Internal Web)
+     * Aturan Skripsi: Tidak boleh kosong, wajib ada @ dan berakhiran @gmail.com.
+     */
+    public function checkEmailForReset(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|ends_with:@gmail.com'
+        ], [
+            'email.required' => 'Gagal memproses! Kolom input email tidak boleh dibiarkan kosong.',
+            'email.email' => 'Format penulisan tidak sah! Pastikan menyertakan karakter @ dengan benar.',
+            'email.ends_with' => 'Akses ditolak! Sistem kemitraan wajib menggunakan domain email resmi @gmail.com.'
+        ]);
+
+        // Cek langsung ke database MySQL lokal
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Verifikasi Gagal! Alamat email tersebut belum terdaftar di dalam sistem Rumah BUMN.'])->withInput();
+        }
+
+        // Lempar data email ke session flash untuk pengamanan form halaman berikutnya
+        return redirect()->route('password.reset.page')->with('reset_email', $request->email);
+    }
+
+    /**
+     * 🌟 TAHAP 2: Eksekusi Penggantian Kata Sandi Baru Langsung ke MySQL
+     * Aturan Skripsi: Tidak boleh kosong, minimal 8 karakter (bebas), pengetikan ulang wajib sama cocok.
+     */
+    public function executeInAppReset(Request $request)
+    {
+        // 🔒 KUNCI UTAMA SINKRONISASI SESSION BALIK: Reflash data email agar tidak hilang saat validasi mental
+        if ($request->filled('email')) {
+            session()->flash('reset_email', $request->email);
+        }
+        $request->flash();
+
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.required' => 'Gagal menyimpan! Kolom input password baru tidak boleh kosong.',
+            'password.min' => 'Keamanan lemah! Kata sandi baru wajib bertumpu minimal pada 8 karakter.',
+            'password.confirmed' => 'Sinkronisasi gagal! Ketikan pada kolom konfirmasi kata sandi baru tidak cocok.'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        
+        // Perbarui data password terenkripsi di MySQL
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Tulis notifikasi log otomatis ke database HistoryMitra jika profil mitra sudah ada
+        if ($user->mitra) {
+            \App\Models\HistoryMitra::create([
+                'mitra_id'    => $user->mitra->id,
+                'action'      => 'reviewed',
+                'description' => "Pemberitahuan Keamanan: Pemulihan kata sandi akun via web diselesaikan sukses pada " . now()->format('d-m-Y H:i') . " WIB.",
+                'user_id'     => $user->id
+            ]);
+        }
+
+        return redirect()->route('login')->with('success', 'Kata sandi Anda berhasil diperbarui di database! Silakan mencoba login kembali menggunakan password baru.');
     }
 
     public function logout(Request $request){

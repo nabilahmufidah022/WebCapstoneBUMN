@@ -79,9 +79,17 @@
             <form method="POST" action="{{ route('logincheck') }}">
                 @csrf
 
+                {{-- 🌟 SINKRONISASI FITUR: Penyetelan Kotak Alert Pesan Sukses Ganti Password --}}
+                @if(session('success'))
+                    <div class="alert alert-success small mb-3 border-0 d-flex align-items-center" style="border-radius: 6px; background-color: #d1e7dd; color: #0f5132;">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <div>{{ session('success') }}</div>
+                    </div>
+                @endif
+
                 @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
+                    <div class="alert alert-danger mb-3 border-0" style="border-radius: 6px;">
+                        <ul class="mb-0 small ps-3">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -107,9 +115,16 @@
                             <i class="bi bi-eye" id="eyeIcon"></i>
                         </span>
                     </div>
+
+                    {{-- SINKRONISASI FITUR: Link Lupa Password Penyelarasan Dokumen UAT Skripsi --}}
+                    <div class="d-flex justify-content-end mt-1">
+                        <a href="{{ route('password.request') }}" class="text-decoration-none extra-links fw-semibold text-primary">
+                            Forgot Password?
+                        </a>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn w-100 btn-login">Login</button>
+                <button type="submit" class="btn w-100 btn-login mt-2">Login</button>
 
                 <div class="text-center mt-3">
                     <span style="font-size: 14px;">Don't have an account?

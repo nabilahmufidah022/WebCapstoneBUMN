@@ -54,13 +54,16 @@ class MitraController extends Controller
             $query->whereYear('created_at', $request->tahun);
         }
 
-        // Logic Sorting Khusus
+        // Logic Sorting & Filtering Khusus
         if ($request->sort == 'keaktifan_low') {
-            // Sort berdasarkan jumlah partisipasi tersedikit (Rekomendasi Non-Aktif)
-            $query->orderBy('mitra_event_participations_count', 'asc');
+            // 🌟 KUNCI FILTER: Hanya meloloskan mitra yang total keterlibatannya MAKSIMAL 2 PELATIHAN (0, 1, atau 2 sesi)
+            $query->having('mitra_event_participations_count', '<=', 2)
+                  ->orderBy('mitra_event_participations_count', 'asc');
         } elseif ($request->sort == 'rating_high') {
-            // Sort berdasarkan rating rata-rata tertinggi
-            $query->orderBy('average_rating', 'desc');
+            // Mengeliminasi data bernilai 0 atau null dari list rekomendasi rating tertinggi
+            $query->whereNotNull('average_rating')
+                  ->where('average_rating', '>', 0)
+                  ->orderBy('average_rating', 'desc');
         } else {
             // Default: Data terbaru
             $query->latest();
@@ -355,19 +358,41 @@ class MitraController extends Controller
         return redirect()->back()->with('success', 'Mitra diterima.');
     }
 
+    /**
+     * 🌟 PERBAIKAN HISTORI: Menyimpan log penolakan tanpa menghapus data mitra dari database
+     */
     public function reject($id)
     {
         $mitra = Mitra::findOrFail($id);
+        
+        // Memperbarui status ke angka 3 (Ditolak) agar tersaring keluar dari antrean utama
         $mitra->update(['status' => 3]);
-        HistoryMitra::create(['mitra_id' => $mitra->id, 'action' => 'rejected', 'description' => 'Pendaftaran ditolak.', 'user_id' => Auth::id()]);
-        return redirect()->back()->with('success', 'Mitra ditolak.');
+        
+        // Menuliskan jejak rekam resmi ke tabel log audit trail
+        HistoryMitra::create([
+            'mitra_id' => $mitra->id, 
+            'action' => 'rejected', 
+            'description' => 'Pendaftaran ditolak oleh manajemen admin Rumah BUMN Jakarta.', 
+            'user_id' => Auth::id()
+        ]);
+        
+        return redirect()->back()->with('success', 'Pendaftaran Mitra ' . $mitra->nama_perusahaan . ' sukses ditolak dan dipindahkan ke dalam tab riwayat.');
     }
 
+    /**
+     * 🌟 PERBAIKAN: Membagi data antrean (0,1) dan data ditolak (3) secara realtime
+     */
     public function goKelolaPendaftaran()
     {
         if (Auth::user()->usertype != 'admin') return redirect('/');
+        
+        // Antrean Utama
         $mitras = Mitra::with('user')->whereIn('status', [0, 1])->orderBy('created_at', 'asc')->get();
-        return view('partnership.kelola_pendaftaran', compact('mitras'));
+        
+        // Data Histori Ditolak
+        $rejectedMitras = Mitra::with('user')->where('status', 3)->orderBy('updated_at', 'desc')->get();
+        
+        return view('partnership.kelola_pendaftaran', compact('mitras', 'rejectedMitras'));
     }
 
     public function detail($id)
