@@ -16,7 +16,7 @@ class MitraParticipationController extends Controller
     {
         $user = Auth::user();
 
-        // Query dasar dengan relasi mitra
+        // Query dasar dengan relasi mitra - Diurutkan berdasarkan tanggal terdekat
         $query = MitraEventParticipation::with('mitra')->orderBy('tanggal_pelatihan', 'asc');
 
         // 1. FILTER OTOMATIS BERDASARKAN ROLE
@@ -25,7 +25,7 @@ class MitraParticipationController extends Controller
             $query->where('mitra_id', $mitra_id);
         }
 
-        // 2. FILTER STATUS
+        // 2. FILTER STATUS (Hanya aktif jika pengguna benar-benar memilih filter di dropdown antarmuka)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -83,8 +83,9 @@ class MitraParticipationController extends Controller
             'status' => 'Akan Datang',
         ]);
 
-        return redirect()->route('mitra.participation.index', ['status' => 'Akan Datang'])
-                         ->with('success', 'Jadwal silabus berhasil ditambahkan.');
+        // 🌟 PERBAIKAN UTAMA: Mengabaikan array parameter string status agar seluruh bulan (Mei, Juni, Juli) langsung terbuka pasca simpan data
+        return redirect()->route('mitra.participation.index')
+                         ->with('success', 'Jadwal silabus baru berhasil ditambahkan untuk seluruh periode.');
     }
 
     /**
@@ -114,7 +115,7 @@ class MitraParticipationController extends Controller
             'kategori' => $request->kategori,
         ]);
 
-        return redirect()->back()->with('success', 'Data agenda berhasil diperbarui!');
+        return redirect()->route('mitra.participation.index')->with('success', 'Data agenda berhasil diperbarui!');
     }
 
     /**
@@ -122,7 +123,6 @@ class MitraParticipationController extends Controller
      */
     public function feedback($id)
     {
-        // Mengambil data agenda untuk konteks feedback mitra
         $participation = MitraEventParticipation::with('mitra')->findOrFail($id);
         return view('partnership.feedback_mitra', compact('participation'));
     }
@@ -139,7 +139,6 @@ class MitraParticipationController extends Controller
 
         $participation = MitraEventParticipation::findOrFail($id);
 
-        // Simpan feedback dan rating ke kolom rating_mitra agar terbaca oleh logika Blade
         $participation->update([
             'feedback_mitra' => $request->saran,
             'rating_mitra' => $request->kepuasan
@@ -169,14 +168,12 @@ class MitraParticipationController extends Controller
 
         $participation = MitraEventParticipation::findOrFail($id);
 
-        // Update penilaian admin dan status agenda
         $participation->update([
             'rating' => $request->rating,
             'catatan_internal' => $request->catatan_internal,
             'status' => 'Selesai'
         ]);
 
-        // Update Reputasi Mitra (Average Rating & Status Aktif)
         $mitra = Mitra::find($participation->mitra_id);
         if ($mitra) {
             $average = MitraEventParticipation::where('mitra_id', $mitra->id)
@@ -193,7 +190,8 @@ class MitraParticipationController extends Controller
             ]);
         }
 
-        return redirect()->route('mitra.participation.index', ['status' => 'Selesai'])
+        // 🌟 PERBAIKAN UTAMA: Mengubah redirect agar bersih tanpa membawa filter status, menjamin seluruh list agenda tidak hilang dari layar
+        return redirect()->route('mitra.participation.index')
                          ->with('success', 'Agenda telah diselesaikan dan penilaian berhasil disimpan.');
     }
 
@@ -207,7 +205,7 @@ class MitraParticipationController extends Controller
     }
 
     /**
-     * Hapus Data.
+     * Hapus Data Silabus.
      */
     public function destroy($id)
     {
