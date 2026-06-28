@@ -104,7 +104,7 @@
             <div class="bg-light p-4 d-flex justify-content-between align-items-center">
 
                 <div class="d-flex gap-2">
-                    {{-- 🌟 SINKRONISASI UTAMA: Jika role bernilai user, arahkan mutlak kembali ke dashboard monitoring mitra --}}
+                    {{-- SINKRONISASI UTAMA: Jika role bernilai user, arahkan mutlak kembali ke dashboard monitoring mitra --}}
                     @if(auth()->user()->usertype === 'user')
                         <a href="{{ route('dashboard') }}" class="btn btn-white border rounded-pill px-4 btn-sm fw-bold shadow-sm">
                             <i class="bx bx-left-arrow-alt me-1"></i> Kembali ke Dashboard
@@ -123,14 +123,12 @@
                         </button>
                         @endif
 
-                        {{-- Pengecekan diselaraskan menjadi 'user' --}}
                         @if(auth()->user()->usertype === 'user' && is_null($participation->rating_mitra))
                         <button class="btn btn-success btn-sm rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#feedbackModal">
                             <i class="bx bx-chat me-1"></i> Kirim Evaluasi Kegiatan
                         </button>
                         @endif
 
-                        {{-- Pengecekan diselaraskan menjadi 'user' --}}
                         @if(auth()->user()->usertype === 'user' && !is_null($participation->rating_mitra))
                         <a href="{{ route('mitra.participation.feedback', ['id' => $participation->id, 'section' => 'all']) }}"
                            class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold">
@@ -149,7 +147,6 @@
                 @if(auth()->user()->usertype === 'admin')
                 <form action="{{ route('mitra.participation.destroy', $participation->id) }}" method="POST" onsubmit="return confirm('Hapus data keikutsertaan ini?');">
                     @csrf
-                    @html_method := 'DELETE'
                     <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" class="btn btn-link text-danger btn-sm text-decoration-none p-0 fw-bold">
                         <i class="bx bx-trash me-1"></i> Hapus

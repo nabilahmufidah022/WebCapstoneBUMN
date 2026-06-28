@@ -45,36 +45,42 @@
                             @enderror
                         </div>
 
-                        {{-- Section Data Bisnis Kemitraan (Jika Ada) --}}
+                        {{-- Section Data Bisnis Kemitraan (Bisa Diedit Dinamis oleh Mitra) --}}
                         @if($mitra)
                             <div class="mb-3">
-                                <label class="small mb-1" for="nama_perusahaan">Nama Perusahaan</label>
-                                <input type="text" class="form-control text-primary fw-bold" id="nama_perusahaan" name="nama_perusahaan" value="{{ old('nama_perusahaan', $mitra->nama_perusahaan) }}" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="{{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">
+                                <label class="small mb-1" for="nama_perusahaan">Nama Perusahaan <span class="text-muted">(🔒 Dikunci Sistem)</span></label>
+                                {{-- Tetap readonly agar data entitas nama tidak dimanipulasi --}}
+                                <input type="text" class="form-control text-primary fw-bold" id="nama_perusahaan" name="nama_perusahaan" value="{{ old('nama_perusahaan', $mitra->nama_perusahaan) }}" readonly style="background-color: #f8fafc;">
                             </div>
 
                             <div class="mb-3">
                                 <label class="small mb-1" for="bidang_perusahaan">Bidang Usaha</label>
-                                <input type="text" class="form-control" id="bidang_perusahaan" name="bidang_perusahaan" value="{{ old('bidang_perusahaan', is_array($mitra->bidang_perusahaan) ? implode(', ', $mitra->bidang_perusahaan) : $mitra->bidang_perusahaan) }}" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="{{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">
+                                {{-- 🔓 Buka Gembok: Atribut readonly dibuang --}}
+                                <input type="text" class="form-control" id="bidang_perusahaan" name="bidang_perusahaan" value="{{ old('bidang_perusahaan', is_array($mitra->bidang_perusahaan) ? implode(', ', $mitra->bidang_perusahaan) : $mitra->bidang_perusahaan) }}">
                             </div>
 
                             <div class="mb-3">
                                 <label class="small mb-1" for="nama_lengkap">Nama PIC / Pemilik</label>
-                                <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" value="{{ old('nama_lengkap', $mitra->nama_lengkap) }}" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="{{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">
+                                {{-- 🔓 Buka Gembok: Atribut readonly dibuang --}}
+                                <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" value="{{ old('nama_lengkap', $mitra->nama_lengkap) }}">
                             </div>
 
                             <div class="mb-3">
                                 <label class="small mb-1" for="no_telepon">Nomor Telepon (WA)</label>
-                                <input type="text" class="form-control" id="no_telepon" name="no_telepon" value="{{ old('no_telepon', $mitra->no_telepon) }}" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="{{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">
+                                {{-- 🔓 Buka Gembok: Atribut readonly dibuang --}}
+                                <input type="text" class="form-control" id="no_telepon" name="no_telepon" value="{{ old('no_telepon', $mitra->no_telepon) }}">
                             </div>
 
                             <div class="mb-3">
                                 <label class="small mb-1" for="deskripsi_perusahaan">Deskripsi Usaha</label>
-                                <textarea class="form-control" id="deskripsi_perusahaan" name="deskripsi_perusahaan" rows="3" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="resize: none; {{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">{{ $mitra->deskripsi_perusahaan }}</textarea>
+                                {{-- 🔓 Buka Gembok: Atribut readonly dibuang --}}
+                                <textarea class="form-control" id="deskripsi_perusahaan" name="deskripsi_perusahaan" rows="3" style="resize: none;">{{ $mitra->deskripsi_perusahaan }}</textarea>
                             </div>
 
                             <div class="mb-4">
                                 <label class="small mb-1" for="lokasi_perusahaan">Lokasi / Alamat Perusahaan</label>
-                                <textarea class="form-control" id="lokasi_perusahaan" name="lokasi_perusahaan" rows="3" {{ $user->usertype === 'admin' ? '' : 'readonly' }} style="resize: none; {{ $user->usertype === 'admin' ? '' : 'background-color: #f8fafc;' }}">{{ $mitra->lokasi_perusahaan }}</textarea>
+                                {{-- 🔓 Buka Gembok: Atribut readonly dibuang --}}
+                                <textarea class="form-control" id="lokasi_perusahaan" name="lokasi_perusahaan" rows="3" style="resize: none;">{{ $mitra->lokasi_perusahaan }}</textarea>
                             </div>
 
                         @elseif($user->usertype === 'user' || $user->usertype === 'mitra')
@@ -95,7 +101,7 @@
                             @endif
                         </div>
 
-                        {{-- Danger Zone Section (Diberi pembatas biar aman) --}}
+                        {{-- Danger Zone Section --}}
                         <hr class="my-4">
                         <div class="p-3 bg-light rounded" style="border: 1px solid #fecaca;">
                             <h6 class="text-danger fw-bold small mb-1">Danger Zone</h6>
@@ -137,7 +143,6 @@
                             <input type="email" class="form-control" id="new_pic_email" name="new_pic_email" placeholder="Masukkan email aktif PIC baru" required>
                         </div>
 
-                        {{-- INPUT TAMBAHAN: NOMOR TELEPON / WA --}}
                         <div class="mb-3">
                             <label class="small mb-1 fw-semibold" for="new_pic_phone">Nomor Telepon (WA) PIC Baru</label>
                             <input type="text" class="form-control" id="new_pic_phone" name="new_pic_phone" placeholder="Contoh: 0812XXXXXXXX" required>
@@ -167,5 +172,4 @@
         }
     </script>
 </div>
-
 @endsection
