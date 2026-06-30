@@ -33,7 +33,7 @@ class MitraController extends Controller
 
         // Logic Filter Pencarian (Nama Perusahaan atau PIC)
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('nama_perusahaan', 'like', '%' . $request->search . '%')
                   ->orWhere('nama_lengkap', 'like', '%' . $request->search . '%');
             });
@@ -51,16 +51,19 @@ class MitraController extends Controller
 
         // Logic Sorting & Filtering Khusus
         if ($request->sort == 'keaktifan_low') {
-            // 🌟 KUNCI FILTER: Hanya meloloskan mitra yang total keterlibatannya MAKSIMAL 2 PELATIHAN (0, 1, atau 2 sesi)
+
+            // 🌟 KUNCI FILTER: Hanya meloloskan mitra yang total keterlibatannya MAKSIMAL 2 PELATIHAN
             $query->having('mitra_event_participations_count', '<=', 2)
                   ->orderBy('mitra_event_participations_count', 'asc');
+
         } elseif ($request->sort == 'rating_high') {
-            // Mengeliminasi data bernilai 0 atau null dari list rekomendasi rating tertinggi
+
             $query->whereNotNull('average_rating')
                   ->where('average_rating', '>', 0)
                   ->orderBy('average_rating', 'desc');
+
         } else {
-            // Default: Data terbaru
+
             $query->latest();
         }
 
@@ -68,32 +71,36 @@ class MitraController extends Controller
 
         /**
          * FITUR 3: LOGIKA STATUS OTOMATIS (AUDIT TAHUNAN)
-         * 1. Mitra yang baru gabung di tahun berjalan (currentYear) otomatis AKTIF.
-         * 2. Mitra lama diaudit berdasarkan keterlibatan tahun sebelumnya (currentYear - 1).
-         * 3. Jika tahun lalu tidak mencapai minimal 3 pelatihan, maka NON-AKTIF.
          */
         foreach ($mitras as $mitra) {
+
             $tahunGabung = $mitra->created_at->year;
 
             if ($tahunGabung >= $currentYear) {
-                // KONDISI A: Mitra Baru (Masa Tenggang 1 Tahun)
+
                 $mitra->status_aktif = 'Aktif';
                 $mitra->is_active = true;
+
             } else {
-                // KONDISI B: Mitra Lama (Audit Berdasarkan Tahun Lalu)
+
                 $lastYear = $currentYear - 1;
+
                 $countLastYear = $mitra->mitraEventParticipations()
-                                       ->whereYear('tanggal_pelatihan', $lastYear)
-                                       ->count();
+                    ->whereYear('tanggal_pelatihan', $lastYear)
+                    ->count();
 
                 if ($countLastYear < 3) {
+
                     $mitra->status_aktif = 'Non-Aktif';
                     $mitra->is_active = false;
+
                 } else {
+
                     $mitra->status_aktif = 'Aktif';
                     $mitra->is_active = true;
                 }
             }
+
             $mitra->save();
         }
 
@@ -102,10 +109,11 @@ class MitraController extends Controller
         $pendingMitra = Mitra::where('status', 0)->count();
         $approvedMitra = Mitra::where('status', 2)->count();
         $totalParticipations = MitraEventParticipation::count();
+
         $recentParticipations = MitraEventParticipation::with('mitra')
-                                ->latest()
-                                ->take(5)
-                                ->get();
+            ->latest()
+            ->take(5)
+            ->get();
 
         return view('partnership.list_mitra', compact(
             'mitras',
@@ -119,14 +127,13 @@ class MitraController extends Controller
     }
 
     /**
-     * 🌟 MANAJEMEN DATA BARU: Memproses pembaruan data akun & profil bisnis mandiri oleh Mitra.
-     * Mengakomodasi pembukaan gembok fields yang diubah dari readonly.
+     * 🌟 MANAJEMEN DATA BARU:
+     * Memproses pembaruan data akun & profil bisnis mandiri oleh Mitra.
      */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
 
-        // 1. Validasi Inputan Akun Utama & Data Kemitraan
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -138,25 +145,36 @@ class MitraController extends Controller
             'lokasi_perusahaan' => 'required|string',
         ]);
 
-        // 2. Proses Update Data Akun User (Name & Email)
+        // Update User
         $user->name = $request->name;
         $user->email = $request->email;
 
-        // Penanganan Unggah Foto Profil Baru
         if ($request->hasFile('profile_image')) {
+
             $imageName = time() . '_avatar.' . $request->profile_image->extension();
-            $request->profile_image->move(public_path('img'), $imageName);
+
+            $request->profile_image->move(
+                public_path('img'),
+                $imageName
+            );
+
             $user->profile_image = $imageName;
         }
+
         $user->save();
 
-        // 3. Proses Update Data Profil Entitas Bisnis Mitra (Jika Data Terdaftar)
+        // Update Data Mitra
         $mitra = Mitra::where('user_id', $user->id)->first();
+
         if ($mitra) {
-            // Memproses konversi string kembali ke array jika bidang usaha diinput via teks terpisah koma
+
             $bidangInput = $request->bidang_perusahaan;
+
             if (str_contains($bidangInput, ',')) {
-                $bidangArray = array_map('trim', explode(',', $bidangInput));
+                $bidangArray = array_map(
+                    'trim',
+                    explode(',', $bidangInput)
+                );
             } else {
                 $bidangArray = [$bidangInput];
             }
@@ -164,16 +182,20 @@ class MitraController extends Controller
             $mitra->update([
                 'nama_lengkap' => $request->nama_lengkap,
                 'no_telepon' => $request->no_telepon,
-                'bidang_perusahaan' => $bidangArray, // Disimpan sebagai Array/JSON
+                'bidang_perusahaan' => $bidangArray,
                 'deskripsi_perusahaan' => $request->deskripsi_perusahaan,
                 'lokasi_perusahaan' => $request->lokasi_perusahaan,
             ]);
         }
 
-        return redirect()->back()->with('success', 'Profil Akun dan Data Bisnis Kemitraan Berhasil Diperbarui!');
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Profil Akun dan Data Bisnis Kemitraan Berhasil Diperbarui!'
+            );
     }
-
-    /**
+        /**
      * Fitur Cetak Laporan (Export CSV)
      */
     public function exportListMitra(Request $request)
@@ -182,7 +204,8 @@ class MitraController extends Controller
             abort(403);
         }
 
-        $query = Mitra::where('status', 2)->withCount('mitraEventParticipations');
+        $query = Mitra::where('status', 2)
+            ->withCount('mitraEventParticipations');
 
         if ($request->filled('tahun_cetak')) {
             $query->whereYear('created_at', $request->tahun_cetak);
@@ -193,6 +216,7 @@ class MitraController extends Controller
         }
 
         $mitras = $query->latest()->get();
+
         $filename = 'Laporan_Mitra_RumahBUMN_' . date('Ymd_His') . '.csv';
 
         $headers = [
@@ -200,17 +224,27 @@ class MitraController extends Controller
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function() use ($mitras) {
+        $callback = function () use ($mitras) {
+
             $file = fopen('php://output', 'w');
 
             fputcsv($file, [
-                'NAMA PERUSAHAAN', 'BIDANG USAHA', 'NAMA PIC', 'NOMOR TELEPON',
-                'ALAMAT PERUSAHAAN', 'TOTAL KETERLIBATAN (SESI)', 'STATUS MONITORING',
-                'RATING RATA-RATA', 'TANGGAL BERGABUNG'
+                'NAMA PERUSAHAAN',
+                'BIDANG USAHA',
+                'NAMA PIC',
+                'NOMOR TELEPON',
+                'ALAMAT PERUSAHAAN',
+                'TOTAL KETERLIBATAN (SESI)',
+                'STATUS MONITORING',
+                'RATING RATA-RATA',
+                'TANGGAL BERGABUNG'
             ]);
 
             foreach ($mitras as $m) {
-                $bidangString = is_array($m->bidang_perusahaan) ? implode(', ', $m->bidang_perusahaan) : $m->bidang_perusahaan;
+
+                $bidangString = is_array($m->bidang_perusahaan)
+                    ? implode(', ', $m->bidang_perusahaan)
+                    : $m->bidang_perusahaan;
 
                 fputcsv($file, [
                     $m->nama_perusahaan,
@@ -221,9 +255,10 @@ class MitraController extends Controller
                     $m->mitra_event_participations_count,
                     $m->status_aktif ?? ($m->is_active ? 'Aktif' : 'Non-Aktif'),
                     number_format($m->average_rating ?? 0, 1),
-                    $m->created_at->format('d-m-Y')
+                    $m->created_at->format('d-m-Y'),
                 ]);
             }
+
             fclose($file);
         };
 
@@ -275,25 +310,37 @@ class MitraController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Mitra berhasil ditambahkan dan berstatus Aktif.');
+        return redirect()
+            ->back()
+            ->with('success', 'Mitra berhasil ditambahkan dan berstatus Aktif.');
     }
-
-    public function detailIdentitas($id)
+        public function detailIdentitas($id)
     {
-        $mitra = Mitra::withCount('mitraEventParticipations')->findOrFail($id);
-        return view('partnership.detail_identitas_mitra', compact('mitra'));
+        $mitra = Mitra::withCount('mitraEventParticipations')
+            ->findOrFail($id);
+
+        return view(
+            'partnership.detail_identitas_mitra',
+            compact('mitra')
+        );
     }
 
     public function goDaftarMitra()
     {
         $user = Auth::user();
+
         $hasMitra = Mitra::where('user_id', $user->id)->exists();
 
         if ($hasMitra) {
-            return redirect()->route('dashboard')->with('info', 'Anda sudah memiliki data pendaftaran.');
+            return redirect()
+                ->route('dashboard')
+                ->with('info', 'Anda sudah memiliki data pendaftaran.');
         }
 
-        return view('partnership.daftar_mitra', compact('hasMitra'));
+        return view(
+            'partnership.daftar_mitra',
+            compact('hasMitra')
+        );
     }
 
     /**
@@ -326,7 +373,12 @@ class MitraController extends Controller
         ]);
 
         $data = $request->only([
-            'nama_lengkap', 'no_telepon', 'nama_perusahaan', 'bidang_perusahaan', 'lokasi_perusahaan', 'deskripsi_perusahaan'
+            'nama_lengkap',
+            'no_telepon',
+            'nama_perusahaan',
+            'bidang_perusahaan',
+            'lokasi_perusahaan',
+            'deskripsi_perusahaan'
         ]);
 
         $data['user_id'] = Auth::id();
@@ -336,13 +388,23 @@ class MitraController extends Controller
 
         if ($request->hasFile('company_profile')) {
             $fileName = time() . '_cp.' . $request->company_profile->extension();
-            $request->company_profile->move(public_path('uploads/mitra'), $fileName);
+
+            $request->company_profile->move(
+                public_path('uploads/mitra'),
+                $fileName
+            );
+
             $data['company_profile'] = $fileName;
         }
 
         if ($request->hasFile('surat_permohonan_audiensi')) {
             $fileNameAudiensi = time() . '_audiensi.' . $request->surat_permohonan_audiensi->extension();
-            $request->surat_permohonan_audiensi->move(public_path('uploads/mitra'), $fileNameAudiensi);
+
+            $request->surat_permohonan_audiensi->move(
+                public_path('uploads/mitra'),
+                $fileNameAudiensi
+            );
+
             $data['surat_permohonan_audiensi'] = $fileNameAudiensi;
         }
 
@@ -352,58 +414,114 @@ class MitraController extends Controller
             'mitra_id' => $mitra->id,
             'action' => 'registered',
             'description' => 'Mitra baru melakukan pendaftaran.',
-            'user_id' => Auth::id()
+            'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Pendaftaran berhasil dikirim!');
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Pendaftaran berhasil dikirim!');
     }
 
     public function review($id)
     {
         $mitra = Mitra::findOrFail($id);
-        $mitra->update(['status' => 1]);
-        HistoryMitra::create(['mitra_id' => $mitra->id, 'action' => 'reviewed', 'description' => 'Peninjauan oleh admin.', 'user_id' => Auth::id()]);
-        return redirect()->back()->with('success', 'Status: On Review.');
+
+        $mitra->update([
+            'status' => 1,
+        ]);
+
+        HistoryMitra::create([
+            'mitra_id' => $mitra->id,
+            'action' => 'reviewed',
+            'description' => 'Peninjauan oleh admin.',
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Status: On Review.');
     }
 
     public function approve($id)
     {
         $mitra = Mitra::findOrFail($id);
-        $mitra->update(['status' => 2, 'status_aktif' => 'Aktif', 'is_active' => true]);
-        HistoryMitra::create(['mitra_id' => $mitra->id, 'action' => 'approved', 'description' => 'Pendaftaran disetujui.', 'user_id' => Auth::id()]);
-        return redirect()->back()->with('success', 'Mitra diterima.');
+
+        $mitra->update([
+            'status' => 2,
+            'status_aktif' => 'Aktif',
+            'is_active' => true,
+        ]);
+
+        HistoryMitra::create([
+            'mitra_id' => $mitra->id,
+            'action' => 'approved',
+            'description' => 'Pendaftaran disetujui.',
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Mitra diterima.');
     }
 
     public function reject($id)
     {
         $mitra = Mitra::findOrFail($id);
-        $mitra->update(['status' => 3]);
+
+        $mitra->update([
+            'status' => 3,
+        ]);
 
         HistoryMitra::create([
             'mitra_id' => $mitra->id,
             'action' => 'rejected',
             'description' => 'Pendaftaran ditolak oleh manajemen admin Rumah BUMN Jakarta.',
-            'user_id' => Auth::id()
+            'user_id' => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Pendaftaran Mitra ' . $mitra->nama_perusahaan . ' sukses ditolak.');
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Pendaftaran Mitra ' . $mitra->nama_perusahaan . ' sukses ditolak.'
+            );
     }
 
     public function goKelolaPendaftaran()
     {
-        if (Auth::user()->usertype != 'admin') return redirect('/');
+        if (Auth::user()->usertype != 'admin') {
+            return redirect('/');
+        }
 
-        $mitras = Mitra::with('user')->whereIn('status', [0, 1])->orderBy('created_at', 'asc')->get();
-        $rejectedMitras = Mitra::with('user')->where('status', 3)->orderBy('updated_at', 'desc')->get();
+        $mitras = Mitra::with('user')
+            ->whereIn('status', [0, 1])
+            ->orderBy('created_at', 'asc')
+            ->get();
 
-        return view('partnership.kelola_pendaftaran', compact('mitras', 'rejectedMitras'));
+        $rejectedMitras = Mitra::with('user')
+            ->where('status', 3)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view(
+            'partnership.kelola_pendaftaran',
+            compact('mitras', 'rejectedMitras')
+        );
     }
 
     public function detail($id)
     {
         $mitra = Mitra::with('user')->findOrFail($id);
-        $histories = HistoryMitra::with('user')->where('mitra_id', $id)->orderBy('created_at', 'desc')->get();
-        return view('partnership.detail_mitra', compact('mitra', 'histories'));
+
+        $histories = HistoryMitra::with('user')
+            ->where('mitra_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view(
+            'partnership.detail_mitra',
+            compact('mitra', 'histories')
+        );
     }
 
     public function goListMitra(Request $request)

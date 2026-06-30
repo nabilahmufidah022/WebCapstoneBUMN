@@ -1,11 +1,13 @@
 /* Import Google font - Poppins */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
+
 :root {
   --white-color: #fff;
   --blue-color: #4070f4;
@@ -13,14 +15,17 @@
   --grey-color-light: #aaa;
   --black-color: #000;
 }
+
 body {
   background-color: #e7f2fd;
   color: var(--black-color);
   transition: all 0.5s ease;
 }
+
 body.dark {
   background-color: #333;
 }
+
 body.dark {
   --white-color: #333;
   --blue-color: #fff;
@@ -28,7 +33,10 @@ body.dark {
   --grey-color-light: #aaa;
 }
 
-/* navbar */
+/* ===========================
+   NAVBAR
+=========================== */
+
 .navbar {
   position: fixed;
   top: 0;
@@ -42,6 +50,7 @@ body.dark {
   z-index: 1000;
   box-shadow: 0 0 2px var(--grey-color-light);
 }
+
 .logo_item {
   display: flex;
   align-items: center;
@@ -50,46 +59,46 @@ body.dark {
   font-weight: 500;
   color: var(--blue-color);
 }
+
 .navbar img {
   width: 35px;
   height: 35px;
   object-fit: cover;
   border-radius: 50%;
 }
+
 .search_bar {
   height: 47px;
   max-width: 430px;
   width: 100%;
 }
-/* .search_bar input {
-  border-radius: 25px;
-  font-size: 1px;
-  outline: none;
-  background-color: var(--white-color);
-  color: var(--grey-color);
-  border: 1px solid var(--grey-color-light);
-  padding: 0 20px;
-} */
+
 .navbar_content {
   display: flex;
   align-items: center;
   column-gap: 25px;
 }
+
 .navbar_content i {
   cursor: pointer;
   font-size: 20px;
   color: var(--grey-color);
 }
+
 .profile {
   cursor: pointer;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all .3s ease;
 }
+
 .profile:hover {
   box-shadow: 0 0 5px var(--grey-color-light);
 }
 
-/* sidebar */
+/* ===========================
+   SIDEBAR
+=========================== */
+
 .sidebar {
   background-color: var(--white-color);
   width: 300px;
@@ -99,376 +108,660 @@ body.dark {
   height: 100%;
   padding: 80px 20px;
   z-index: 100;
-  overflow-y: scroll;
+  overflow-y: auto;
   box-shadow: 0 0 1px var(--grey-color-light);
-  transition: all 0.5s ease;
+  transition: all .5s ease;
 }
-.sidebar.close {
-  padding: 60px 0;
-  width: 80px;
-}
+
 .sidebar::-webkit-scrollbar {
   display: none;
 }
+
+.sidebar.close {
+  width: 80px;
+  padding: 60px 0;
+}
+
 .menu_content {
   position: relative;
 }
+
 .menu_title {
   margin: 15px 0;
   padding: 0 20px;
   font-size: 18px;
 }
+
 .sidebar.close .menu_title {
   padding: 6px 30px;
 }
+
 .menu_title::before {
   color: var(--grey-color);
   white-space: nowrap;
 }
-.menu_dahsboard::before {
+
+.menu_dashboard::before {
   content: "Dashboard";
 }
+
 .menu_editor::before {
   content: "Editor";
 }
+
 .menu_setting::before {
   content: "Setting";
 }
+
 .sidebar.close .menu_title::before {
   content: "";
   position: absolute;
-  height: 2px;
   width: 18px;
+  height: 2px;
   border-radius: 12px;
   background: var(--grey-color-light);
 }
+
 .menu_items {
-  padding: 0;
   list-style: none;
+  padding: 0;
 }
+
 .navlink_icon {
   position: relative;
-  font-size: 22px;
   min-width: 50px;
   line-height: 40px;
-  display: inline-block;
   text-align: center;
+  display: inline-block;
+  font-size: 22px;
   border-radius: 6px;
 }
+
 .navlink_icon::before {
   content: "";
   position: absolute;
-  height: 100%;
   width: calc(100% + 100px);
+  height: 100%;
   left: -20px;
 }
+
 .navlink_icon:hover {
   background: var(--blue-color);
 }
+
 .sidebar .nav_link {
   display: flex;
   align-items: center;
-  margin: 2px 0;
   width: 100%;
-  padding: 4px ;
+  margin: 2px 0;
+  padding: 4px;
   border-radius: 8px;
-  text-decoration: none;
   color: var(--grey-color);
+  text-decoration: none;
   white-space: nowrap;
 }
+
 .sidebar.close .navlink {
   display: none;
 }
+
 .nav_link:hover {
   color: var(--white-color);
   background: var(--blue-color);
 }
+
 .sidebar.close .nav_link:hover {
-  background: var(--white-color);
+  background: transparent;
 }
+
+/* ===========================
+   SUB MENU (FIX)
+=========================== */
+
 .submenu_item {
   cursor: pointer;
+  position: relative;
 }
+
 .submenu {
   display: none;
 }
+
+.sidebar.close .submenu {
+  display: none !important;
+}
+
+.submenu_item.show_submenu + .submenu {
+  display: block;
+}
+
 .submenu_item .arrow-left {
   position: absolute;
   right: 10px;
-  display: inline-block;
-  margin-right: auto;
+  transition: .3s;
 }
-.sidebar.close .submenu {
-  display: none;
-}
-.show_submenu ~ .submenu {
-  display: block;
-}
-.show_submenu .arrow-left {
+
+.submenu_item.show_submenu .arrow-left {
   transform: rotate(90deg);
 }
+
 .submenu .sublink {
   padding: 15px 15px 15px 52px;
 }
+/* ===========================
+   BOTTOM SIDEBAR
+=========================== */
+
 .bottom_content {
   position: fixed;
   bottom: 60px;
   left: 0;
   width: 260px;
   cursor: pointer;
-  transition: all 0.5s ease;
+  transition: all .5s ease;
 }
+
 .bottom {
   position: absolute;
+  left: 0;
+  width: 100%;
+  padding: 18px 0;
   display: flex;
   align-items: center;
-  left: 0;
   justify-content: space-around;
-  padding: 18px 0;
   text-align: center;
-  width: 100%;
   color: var(--grey-color);
   border-top: 1px solid var(--grey-color-light);
-  background-color: var(--white-color);
+  background: var(--white-color);
 }
+
 .bottom i {
   font-size: 20px;
 }
+
 .bottom span {
   font-size: 18px;
 }
+
 .sidebar.close .bottom_content {
   width: 50px;
   left: 15px;
 }
+
 .sidebar.close .bottom span {
   display: none;
 }
+
 .sidebar.hoverable .collapse_sidebar {
   display: none;
 }
+
 #sidebarOpen {
   display: none;
 }
 
+/* ===========================
+   PROFILE
+=========================== */
+
 .img-account-profile {
-    height: 10rem;
+  height: 10rem;
 }
+
 .rounded-circle {
-    border-radius: 50% !important;
+  border-radius: 50% !important;
 }
+
+/* ===========================
+   CARD
+=========================== */
+
 .card {
-    box-shadow: 0 0.15rem 1.75rem 0 rgb(33 40 50 / 15%);
+  box-shadow: 0 .15rem 1.75rem rgba(33,40,50,.15);
 }
+
 .card .card-header {
-    font-weight: 500;
+  font-weight: 500;
 }
+
 .card-header:first-child {
-    border-radius: 0.35rem 0.35rem 0 0;
+  border-radius: .35rem .35rem 0 0;
 }
+
 .card-header {
-    padding: 1rem 1.35rem;
-    margin-bottom: 0;
-    background-color: rgba(33, 40, 50, 0.03);
-    border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+  padding: 1rem 1.35rem;
+  margin-bottom: 0;
+  background: rgba(33,40,50,.03);
+  border-bottom: 1px solid rgba(33,40,50,.125);
 }
-.form-control, .dataTable-input {
-    display: block;
-    width: 100%;
-    /* padding: 0.875rem 1.125rem; */
-    font-size: 0.875rem;
-    font-weight: 400;
-    line-height: 1;
-    color: #69707a;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #c5ccd6;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    border-radius: 0.35rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+/* ===========================
+   FORM
+=========================== */
+
+.form-control,
+.dataTable-input {
+  display: block;
+  width: 100%;
+  font-size: .875rem;
+  font-weight: 400;
+  line-height: 1;
+  color: #69707a;
+  background: #fff;
+  border: 1px solid #c5ccd6;
+  border-radius: .35rem;
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+/* ===========================
+   NAV TABS
+=========================== */
+
+.nav-borders .nav-link {
+  color: #69707a;
+  border-bottom: .125rem solid transparent;
+  padding: .5rem 0;
+  margin: 0 1rem;
 }
 
 .nav-borders .nav-link.active {
-    color: #0061f2;
-    border-bottom-color: #0061f2;
+  color: #0061f2;
+  border-bottom-color: #0061f2;
 }
-.nav-borders .nav-link {
-    color: #69707a;
-    border-bottom-width: 0.125rem;
-    border-bottom-style: solid;
-    border-bottom-color: transparent;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: 1rem;
-    margin-right: 1rem;
-}
+
+/* ===========================
+   BUTTON
+=========================== */
 
 .btn-danger-soft {
-    color: #000;
-    background-color: #f1e0e3;
-    border-color: #f1e0e3;
+  color: #000;
+  background: #f1e0e3;
+  border-color: #f1e0e3;
 }
 
-@media screen and (max-width: 768px) {
-  #sidebarOpen {
-    font-size: 25px;
-    display: block;
-    margin-right: 10px;
-    cursor: pointer;
-    color: var(--grey-color);
-  }
-  .sidebar.close {
-    left: -100%;
-  }
-  .search_bar {
-    display: none;
-  }
-  .sidebar.close .bottom_content {
-    left: -100%;
-  }
-  main {
-    margin-left: 0;
-  }
-  .sidebar.close ~ main {
-    margin-left: 10px !important;
-    margin-top: 50px !important;
-  }
-  
-}
+/* ===========================
+   MAIN CONTENT
+=========================== */
 
-/* main content adjustment */
 main {
   margin-top: 80px;
   margin-left: 300px;
   padding: 20px;
-  transition: margin-left 0.5s ease;
+  transition: margin-left .5s ease;
 }
+
 .sidebar.close ~ main {
   margin-left: 80px;
 }
 
-/* Additional responsive styles for smaller screens */
-@media screen and (max-width: 576px) {
-  .navbar {
-    padding: 10px 15px;
+/* ===========================
+   TABLE
+=========================== */
+
+.table-container {
+  max-width: 1100px;
+  margin: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #fafafa;
+}
+
+thead th {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #444;
+}
+
+tbody tr:hover {
+  background: #f8faff;
+}
+
+/* ===========================
+   BADGE
+=========================== */
+
+.badge-online {
+  background: #198754;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: .75rem;
+}
+
+.badge-offline {
+  background: #0d6efd;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: .75rem;
+}
+
+.uniform-input {
+  height: 38px;
+}
+/* =====================================================
+   RESPONSIVE - TABLET
+===================================================== */
+
+@media screen and (max-width: 768px) {
+
+  #sidebarOpen {
+    display: block;
+    font-size: 25px;
+    margin-right: 10px;
+    cursor: pointer;
+    color: var(--grey-color);
   }
+
+  .sidebar {
+    width: 260px;
+    left: 0;
+    z-index: 1000;
+  }
+
+  .sidebar.close {
+    left: -100%;
+    width: 260px;
+  }
+
+  .search_bar {
+    display: none;
+  }
+
+  .bottom_content {
+    width: 260px;
+  }
+
+  .sidebar.close .bottom_content {
+    left: -100%;
+  }
+
+  main {
+    margin-left: 0;
+    margin-top: 70px;
+    padding: 15px;
+  }
+
+  .sidebar.close ~ main {
+    margin-left: 0 !important;
+    margin-top: 70px !important;
+  }
+
+  .navbar {
+    padding: 12px 20px;
+  }
+
   .logo_item {
     font-size: 18px;
   }
+
+  .navbar_content {
+    column-gap: 18px;
+  }
+
+  .navbar_content i {
+    font-size: 18px;
+  }
+
+}
+
+/* =====================================================
+   RESPONSIVE - MOBILE
+===================================================== */
+
+@media screen and (max-width: 576px) {
+
+  .navbar {
+    padding: 10px 15px;
+  }
+
+  .logo_item {
+    font-size: 17px;
+  }
+
   .navbar img {
     width: 30px;
     height: 30px;
   }
+
   .navbar_content {
     column-gap: 15px;
   }
+
   .navbar_content i {
     font-size: 18px;
   }
+
   .sidebar {
-    width: 200px;
+    width: 220px;
     padding: 70px 15px;
   }
+
   .sidebar.close {
-    width: 60px;
+    width: 220px;
+    left: -100%;
   }
+
   .menu_title {
     font-size: 16px;
     margin: 10px 0;
     padding: 0 15px;
   }
+
   .sidebar.close .menu_title {
     padding: 6px 20px;
   }
+
   .navlink_icon {
-    font-size: 20px;
     min-width: 40px;
+    font-size: 20px;
   }
+
   .sidebar .nav_link {
-    padding: 2px;
+    padding: 5px;
   }
+
   .submenu .sublink {
-    padding: 5px 5px 5px 42px;
+    padding: 12px 12px 12px 45px;
   }
+
   .bottom_content {
-    width: 200px;
+    width: 220px;
     bottom: 50px;
   }
-  .sidebar.close .bottom_content {
-    width: 60px;
-  }
+
   .bottom {
     padding: 12px 0;
   }
+
   .bottom span {
-    font-size: 16px;
+    font-size: 15px;
   }
+
   .bottom i {
     font-size: 18px;
   }
+
   main {
     padding: 15px;
   }
+
 }
-    .table-container {
-      max-width: 1100px;
-      margin: auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      overflow-x: auto;
-    }
+/* =====================================================
+   DROPDOWN PROFILE
+===================================================== */
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
-    }
-
-    thead {
-      background: #fafafa;
-    }
-
-    thead th {
-      font-weight: 600;
-      text-align: left;
-      padding: 14px 16px;
-      border-bottom: 1px solid #e5e5e5;
-      font-size: 14px;
-      color: #333;
-    }
-
-    tbody td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 14px;
-      color: #444;
-    }
-
-    tbody tr:hover {
-      background-color: #f8faff;
-    }
-
-.badge-online {
-    background-color: #198754;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 0.75rem;
+.dropdown-menu {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.08);
+  padding: 8px 0;
 }
 
-.badge-offline {
-    background-color: #0d6efd;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-}
-.uniform-input {
-    height: 38px;
+.dropdown-item {
+  padding: 10px 18px;
+  font-size: 14px;
+  transition: .2s;
 }
 
+.dropdown-item:hover {
+  background-color: #f5f7fb;
+}
+
+.dropdown-divider {
+  margin: 6px 0;
+}
+
+/* =====================================================
+   SIDEBAR ANIMATION
+===================================================== */
+
+.sidebar,
+.main,
+.navbar,
+.nav_link,
+.submenu,
+.arrow-left {
+  transition: all .3s ease;
+}
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cfcfcf;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b5b5b5;
+}
+
+/* =====================================================
+   FOCUS
+===================================================== */
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* =====================================================
+   UTILITIES
+===================================================== */
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.shadow-sm-custom {
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+.border-radius-10 {
+  border-radius: 10px;
+}
+
+.border-radius-15 {
+  border-radius: 15px;
+}
+
+/* =====================================================
+   FIX SIDEBAR
+===================================================== */
+
+/* Partnership submenu */
+
+.submenu {
+  display: none;
+}
+
+.submenu_item.show_submenu + .submenu {
+  display: block !important;
+}
+
+.submenu_item .arrow-left {
+  transition: transform .3s ease;
+}
+
+.submenu_item.show_submenu .arrow-left {
+  transform: rotate(90deg);
+}
+
+/* Hover */
+
+.sidebar .nav_link:hover {
+  background: var(--blue-color);
+  color: #fff;
+}
+
+.sidebar .nav_link:hover .navlink_icon {
+  color: #fff;
+}
+
+/* Active */
+
+.sidebar .nav_link.active {
+  background: var(--blue-color);
+  color: #fff;
+}
+
+/* =====================================================
+   CLEANUP
+===================================================== */
+
+/*
+Dark mode telah dihapus dari navbar,
+namun variabel tetap dipertahankan agar
+tidak mengganggu halaman lama.
+*/
+
+/*
+Icon Grid telah dihapus dari navbar.
+Tidak diperlukan CSS tambahan.
+*/
+
+/*
+Seluruh CSS telah disinkronkan dengan:
+
+✓ index.blade.php terbaru
+✓ script.js terbaru
+✓ Sidebar Partnership
+✓ Navbar tanpa Grid & Dark Mode
+✓ Bell Notification tetap aktif
+✓ Responsive Desktop & Mobile
+*/
