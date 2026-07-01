@@ -177,7 +177,8 @@
                                     <th class="ps-4">MATERI PELATIHAN</th>
                                     <th>TANGGAL</th>
                                     <th>STATUS</th>
-                                    <th class="pe-4 text-end">AKSI</th>
+                                    {{-- Mengubah text-end menjadi text-center --}}
+                                    <th class="pe-4 text-center" style="width: 180px;">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -195,7 +196,8 @@
                                             <span class="badge bg-primary-soft text-primary rounded-pill px-3">Terjadwal</span>
                                         @endif
                                     </td>
-                                    <td class="pe-4 text-end">
+                                    {{-- Mengubah text-end menjadi text-center serta menyelaraskan flex layout --}}
+                                    <td class="pe-4 text-center">
 
                                         {{-- LOGIKA AKSI --}}
                                         @if($p->status == 'Selesai')
@@ -205,11 +207,11 @@
                                                 <a href="{{ route('mitra.participation.feedback', $p->id) }}"
                                                    class="btn btn-sm btn-warning rounded-pill fw-bold shadow-sm px-3"
                                                    style="font-size: 10px; min-width: 110px;">
-                                                    Berikan Feedback
+                                                     Berikan Feedback
                                                 </a>
                                             @else
                                                 {{-- Area Feedback Terkirim & Detail --}}
-                                                <div class="d-flex flex-column align-items-end gap-1">
+                                                <div class="d-flex flex-column align-items-center gap-1">
 
                                                     <span class="badge bg-success-soft text-success rounded-pill px-2 py-1"
                                                           style="font-size: 10px; min-width: 110px; border: 1px solid rgba(30, 126, 52, 0.2);">
@@ -219,7 +221,7 @@
                                                     <a href="{{ route('mitra.participation.show', $p->id) }}"
                                                        class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 fw-bold"
                                                        style="font-size: 10px; min-width: 110px; line-height: 1.8;">
-                                                        Detail
+                                                         Detail
                                                     </a>
 
                                                 </div>
@@ -230,7 +232,7 @@
                                             <a href="{{ route('mitra.participation.show', $p->id) }}"
                                                class="btn btn-sm btn-light border rounded-pill fw-bold px-3 shadow-sm"
                                                style="font-size: 10px; min-width: 110px;">
-                                                Detail
+                                                 Detail
                                             </a>
                                         @endif
 

@@ -383,15 +383,19 @@ body.dark {
    MAIN CONTENT
 =========================== */
 
-main {
-  margin-top: 80px;
-  margin-left: 300px;
-  padding: 20px;
-  transition: margin-left .5s ease;
+.main {
+    margin-top: 80px;
+    margin-left: 300px;
+    width: calc(100% - 300px);
+    min-height: calc(100vh - 80px);
+    padding: 20px;
+    transition: all .3s ease;
+    overflow-x: hidden;
 }
 
-.sidebar.close ~ main {
-  margin-left: 80px;
+.sidebar.close ~ .main {
+    margin-left: 80px;
+    width: calc(100% - 80px);
 }
 
 /* ===========================

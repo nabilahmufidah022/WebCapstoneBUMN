@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+// Import class notification yang kita butuhkan di sini
+use App\Notifications\ProfileUpdatedNotification;
 
 class MitraController extends Controller
 {
@@ -188,6 +190,21 @@ class MitraController extends Controller
             ]);
         }
 
+        // ==========================================================
+        // 🌟 INTEGRASI NOTIFIKASI UPDATE PROFILE (SERVER MITRA & ADMIN)
+        // ==========================================================
+        // 1. Kirim notifikasi ke User/Mitra yang melakukan perubahan
+        $user->notify(new ProfileUpdatedNotification('Profil Anda berhasil diperbarui.'));
+
+        // 2. Jika yang mengubah adalah Mitra, kirim tembusan log notifikasi ke server Admin
+        if ($user->usertype != 'admin') {
+            $admins = User::where('usertype', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new ProfileUpdatedNotification("Mitra {$user->name} telah memperbarui data profilnya."));
+            }
+        }
+        // ==========================================================
+
         return redirect()
             ->back()
             ->with(
@@ -195,7 +212,8 @@ class MitraController extends Controller
                 'Profil Akun dan Data Bisnis Kemitraan Berhasil Diperbarui!'
             );
     }
-        /**
+
+    /**
      * Fitur Cetak Laporan (Export CSV)
      */
     public function exportListMitra(Request $request)
@@ -314,7 +332,8 @@ class MitraController extends Controller
             ->back()
             ->with('success', 'Mitra berhasil ditambahkan dan berstatus Aktif.');
     }
-        public function detailIdentitas($id)
+
+    public function detailIdentitas($id)
     {
         $mitra = Mitra::withCount('mitraEventParticipations')
             ->findOrFail($id);

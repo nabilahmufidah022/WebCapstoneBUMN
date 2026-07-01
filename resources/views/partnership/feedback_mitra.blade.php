@@ -83,7 +83,7 @@
 </style>
 
 <script>
-    // Script untuk memberikan teks dinamis sesuai jumlah bintang yang dipilih
+    
     document.querySelectorAll('.rating-stars input').forEach(radio => {
         radio.addEventListener('change', (e) => {
             const val = e.target.value;

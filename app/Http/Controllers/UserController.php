@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+// Import class notification yang kita perlukan
+use App\Notifications\PasswordUpdatedNotification;
+use App\Notifications\HandoverPicNotification;
 
 class UserController extends Controller
 {
@@ -155,7 +158,8 @@ class UserController extends Controller
             'notifications'
         ));
     }
-        /**
+
+    /**
      * INTEGRASI FITUR: Halaman Profil Pengguna
      * Memuat data relasi profil bisnis mitra secara realtime.
      */
@@ -243,6 +247,14 @@ class UserController extends Controller
                     "NOTIFIKASI HANDOVER: Pergantian PIC dilakukan secara mandiri dari {$namaLama} ({$emailLama}) menjadi {$request->name} ({$request->email}).",
                 'user_id' => Auth::id(),
             ]);
+
+            // 🌟 TRIGGER NOTIFIKASI HANDOVER MANDIRI DI SERVER MITRA & ADMIN
+            $user->notify(new HandoverPicNotification($user->name, false));
+
+            $admins = User::where('usertype', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new HandoverPicNotification($user->name, true));
+            }
         }
 
         return redirect()
@@ -287,6 +299,18 @@ class UserController extends Controller
                     "NOTIFIKASI HANDOVER RESMI: Alih kepemilikan akses akun penanggung jawab sukses diselesaikan dari {$namaLama} ({$emailLama}) kepada PIC pengganti: {$request->new_pic_name} ({$request->new_pic_email}) dengan No. WA: {$request->new_pic_phone}.",
                 'user_id' => Auth::id(),
             ]);
+
+            // 🌟 TRIGGER NOTIFIKASI HANDOVER RESMI (HANYA JIKA BUKAN ADMIN)
+            if ($user->usertype !== 'admin') {
+                // 1. Kirim ke internal server Mitra pengganti
+                $user->notify(new HandoverPicNotification($user->name, false));
+
+                // 2. Kirim alert tembusan ke server Admin
+                $admins = User::where('usertype', 'admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new HandoverPicNotification($user->name, true));
+                }
+            }
         }
 
         return redirect()
@@ -296,7 +320,8 @@ class UserController extends Controller
                 'Proses Handover PIC berhasil dilakukan. Data akun penanggung jawab telah dimutasi.'
             );
     }
-        /**
+
+    /**
      * Mengubah Password User
      */
     public function changePassword(Request $request)
@@ -327,6 +352,11 @@ class UserController extends Controller
                     now()->format('d-m-Y H:i') . " WIB.",
                 'user_id' => Auth::id(),
             ]);
+        }
+
+        // 🌟 TRIGGER NOTIFIKASI UPDATE PASSWORD SERVER MITRA
+        if ($user->usertype !== 'admin') {
+            $user->notify(new PasswordUpdatedNotification('Password akun Anda berhasil diperbarui.'));
         }
 
         return back()->with(
@@ -400,6 +430,11 @@ class UserController extends Controller
             ]);
         }
 
+        // 🌟 TRIGGER NOTIFIKASI RESET PASSWORD SERVER MITRA
+        if ($user->usertype !== 'admin') {
+            $user->notify(new PasswordUpdatedNotification('Pemulihan password via Forget Password berhasil diselesaikan.'));
+        }
+
         return redirect()
             ->route('login')
             ->with(
@@ -420,7 +455,8 @@ class UserController extends Controller
 
         return redirect()->route('login');
     }
-        /**
+
+    /**
      * Account Management
      */
     public function account()

@@ -1,10 +1,10 @@
 <?php
 
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\MitraParticipationController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +89,17 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [UserController::class, 'logout'])
         ->name('logout');
+
+    // ==========================================================================
+    // 🌟 INTEGRASI ROUTE: MEKANISME NOTIFIKASI (TANDAI SEMUA SUDAH DIBACA)
+    // ==========================================================================
+    Route::get('/notifications/mark-all-read', function() {
+        if (Auth::check()) {
+            Auth::user()->unreadNotifications->markAsRead();
+        }
+        return redirect()->back();
+    })->name('notifications.markAllRead');
+    // ==========================================================================
 
     // ==========================
     // Account Management

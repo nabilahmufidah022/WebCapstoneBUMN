@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\MitraEventParticipation;
 use App\Models\Mitra;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+// Import class notification yang kita perlukan
+use App\Notifications\AgendaReminderNotification;
 
 class MitraParticipationController extends Controller
 {
@@ -55,7 +59,7 @@ class MitraParticipationController extends Controller
             'approved',
             'Approved',
             '1',
-            1,
+            '1',
             2
         ])->get();
 
@@ -81,7 +85,7 @@ class MitraParticipationController extends Controller
             'kategori' => 'required|string',
         ]);
 
-        MitraEventParticipation::create([
+        $participation = MitraEventParticipation::create([
             'mitra_id' => $request->mitra_id,
             'judul_pelatihan' => $request->judul_pelatihan,
             'tanggal_pelatihan' => $request->tanggal_pelatihan,
@@ -92,6 +96,28 @@ class MitraParticipationController extends Controller
             'kategori' => $request->kategori,
             'status' => 'Akan Datang',
         ]);
+
+        // ==========================================================================
+        // 🌟 AUTOMATION TRIGGER: NOTIFIKASI REMINDER AGENDA BARU (INSTAN TANPA CRON)
+        // ==========================================================================
+        $mitra = Mitra::find($request->mitra_id);
+        $waktu = Carbon::parse($request->tanggal_pelatihan)->format('H:i');
+        $tanggal = Carbon::parse($request->tanggal_pelatihan)->format('d-m-Y');
+
+        // 1. Tembak otomatis ke internal server Mitra terpilih
+        if ($mitra && $mitra->user) {
+            $mitra->user->notify(new AgendaReminderNotification($request->judul_pelatihan));
+        }
+
+        // 2. Tembak alert log monitoring otomatis ke seluruh server Admin
+        $admins = User::where('usertype', 'admin')->get();
+        foreach ($admins as $admin) {
+            $namaPT = $mitra->nama_perusahaan ?? 'Mitra Terkait';
+            $pesanAdmin = "Jadwal Pelatihan Baru: Kelas \"{$request->judul_pelatihan}\" untuk Mitra {$namaPT} telah dijadwalkan pada tgl {$tanggal} jam {$waktu} WIB.";
+            
+            $admin->notify(new AgendaReminderNotification($request->judul_pelatihan, $pesanAdmin));
+        }
+        // ==========================================================================
 
         return redirect()
             ->route('mitra.participation.index')
@@ -214,6 +240,17 @@ class MitraParticipationController extends Controller
                 'average_rating' => $average,
                 'status_aktif' => ($totalSelesai >= 3) ? 'Aktif' : 'Non-Aktif',
             ]);
+
+            // ==========================================================================
+            // 🌟 AUTOMATION TRIGGER: NOTIFIKASI PELATIHAN SELESAI & EVALUASI
+            // ==========================================================================
+            if ($mitra->user) {
+                $mitra->user->notify(new AgendaReminderNotification(
+                    $participation->judul_pelatihan, 
+                    "Kelas \"{$participation->judul_pelatihan}\" telah selesai dilaksanakan. Silahkan isi feedback kepuasan Anda di halaman dashboard."
+                ));
+            }
+            // ==========================================================================
         }
 
         return redirect()

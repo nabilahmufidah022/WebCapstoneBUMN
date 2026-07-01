@@ -268,10 +268,10 @@
 
                       {{-- Tombol Setujui & Tolak Dikunci (Disabled) Secara Interaktif --}}
                       <button type="button" class="btn btn-success fw-bold rounded-pill opacity-50 py-2" disabled style="cursor: not-allowed;">
-                          <i class="bx bx-check"></i> Setujui Mitra (Terkunci)
+                          <i class="bx bx-check"></i> Setujui Mitra 
                       </button>
                       <button type="button" class="btn btn-danger fw-bold rounded-pill opacity-50 py-2" disabled style="cursor: not-allowed;">
-                          <i class="bx bx-x"></i> Tolak Pendaftaran (Terkunci)
+                          <i class="bx bx-x"></i> Tolak Pendaftaran
                       </button>
 
                   {{-- ==========================================================================
