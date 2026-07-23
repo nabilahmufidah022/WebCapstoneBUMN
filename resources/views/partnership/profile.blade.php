@@ -48,7 +48,7 @@
                         {{-- Section Data Bisnis Kemitraan (Bisa Diedit Dinamis oleh Mitra) --}}
                         @if($mitra)
                             <div class="mb-3">
-                                <label class="small mb-1" for="nama_perusahaan">Nama Perusahaan <span class="text-muted">(🔒 Dikunci Sistem)</span></label>
+                                <label class="small mb-1" for="nama_perusahaan">Nama Perusahaan <span class="text-muted"></span></label>
                                 {{-- Tetap readonly agar data entitas nama tidak dimanipulasi --}}
                                 <input type="text" class="form-control text-primary fw-bold" id="nama_perusahaan" name="nama_perusahaan" value="{{ old('nama_perusahaan', $mitra->nama_perusahaan) }}" readonly style="background-color: #f8fafc;">
                             </div>

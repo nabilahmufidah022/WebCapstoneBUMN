@@ -42,7 +42,7 @@
 
                     {{-- FITUR REVISI DOSEN: SELECTION FILTER DROPDOWN KATEGORI PELATIHAN --}}
                     <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted mb-1">Bidang Usaha</label>
+                        <label class="form-label small fw-bold text-muted mb-1">Bidang</label>
                         <select name="bidang" class="form-select form-select-sm shadow-none">
                             <option value="">Semua Bidang</option>
                             <option value="Literasi Digital" {{ request('bidang') == 'Literasi Digital' ? 'selected' : '' }}>Literasi Digital</option>

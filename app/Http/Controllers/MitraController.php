@@ -140,7 +140,7 @@ class MitraController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'no_telepon' => 'required|regex:/^[0-9]+$/|max:20',
+            'no_telepon' => 'required|regex:/^[0-9]+$/|max:13',
             'nama_lengkap' => 'required|string|max:255',
             'bidang_perusahaan' => 'required|string',
             'deskripsi_perusahaan' => 'required|string',
@@ -294,7 +294,7 @@ class MitraController extends Controller
 
         $request->validate([
             'nama_lengkap' => 'required|string|regex:/^[a-zA-Z\s]+$/|max:255',
-            'no_telepon' => 'required|regex:/^[0-9]+$/|max:20',
+            'no_telepon' => 'required|regex:/^[0-9]+$/|max:13',
             'nama_perusahaan' => 'required|string|max:255',
             'bidang_perusahaan' => 'required|array',
             'lokasi_perusahaan' => 'required|string|max:255',
@@ -369,13 +369,13 @@ class MitraController extends Controller
     {
         $request->validate([
             'nama_lengkap' => 'required|string|regex:/^[a-zA-Z\s]+$/|max:255',
-            'no_telepon' => 'required|regex:/^[0-9]+$/|max:20',
+            'no_telepon' => 'required|regex:/^[0-9]+$/|max:13',
             'nama_perusahaan' => 'required|string|max:255',
             'bidang_perusahaan' => 'required|array',
             'lokasi_perusahaan' => 'required|string|max:255',
             'deskripsi_perusahaan' => 'required|string',
-            'company_profile' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-            'surat_permohonan_audiensi' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'company_profile' => 'required|file|mimes:pdf,doc,docx|max:5120',
+            'surat_permohonan_audiensi' => 'required|file|mimes:pdf,doc,docx|max:5120',
         ], [
             'nama_lengkap.required' => 'Kolom Nama Lengkap wajib diisi.',
             'nama_lengkap.regex' => 'Pendaftaran gagal! Nama penanggung jawab PIC hanya boleh diisi susunan huruf alfabet.',
@@ -385,11 +385,14 @@ class MitraController extends Controller
             'bidang_perusahaan.required' => 'Wajib memilih minimal satu Bidang Usaha / Kategori Pelatihan.',
             'lokasi_perusahaan.required' => 'Kolom Alamat Perusahaan wajib diisi.',
             'deskripsi_perusahaan.required' => 'Kolom Deskripsi Usaha wajib diisi.',
-            'company_profile.mimes' => 'Format file Company Profile harus berupa PDF, DOC, atau DOCX.',
+            'company_profile.required' => 'File Company Profile wajib diunggah.',
+            'company_profile.mimes'=> 'Format file Company Profile harus berupa PDF, DOC, atau DOCX.',
             'company_profile.max' => 'Ukuran berkas Company Profile maksimal berukuran 5MB.',
+            'surat_permohonan_audiensi.required' => 'File Surat Permohonan Audiensi wajib diunggah.',
             'surat_permohonan_audiensi.mimes' => 'Format file Surat Permohonan Audiensi harus berupa PDF, DOC, atau DOCX.',
             'surat_permohonan_audiensi.max' => 'Ukuran berkas Surat Permohonan Audiensi maksimal berukuran 5MB.',
-        ]);
+],
+        );
 
         $data = $request->only([
             'nama_lengkap',
